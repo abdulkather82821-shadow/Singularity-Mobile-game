@@ -35,8 +35,11 @@ var shake: float = 0.0
 var last_note: String = ""
 var touch_axis: Vector2 = Vector2.ZERO
 var touch_buttons: Dictionary = {}
+var autoplay: bool = false
 var _hitstop_until: int = 0
 var _title_clock: float = 0.0
+var _autoplay_clock: float = 0.0
+var _autoplay_logged: float = 0.0
 
 @onready var stage_root: Node2D = $Stage
 @onready var background: Backdrop = $Stage/Background
@@ -61,6 +64,10 @@ func _ready() -> void:
 	_wire_story()
 	SaveManager.settings_changed.connect(_apply_settings)
 	back_to_title()
+	autoplay = OS.get_cmdline_user_args().has("--autoplay")
+	if autoplay:
+		print("AUTOPLAY: unattended run starting")
+		new_run()
 
 
 func _exit_tree() -> void:
@@ -218,6 +225,8 @@ func _show_stage_intro(index: int) -> void:
 	menus.show_stage_intro(stage_index, last_note)
 	last_note = ""
 	AudioManager.play_music(_stage_theme())
+	if autoplay:
+		begin_stage_play.call_deferred()
 
 
 func _stage_theme() -> String:
@@ -343,6 +352,10 @@ func _quit_game() -> void:
 
 # ------------------------------------------------------------------ dialogue
 func _play_dialogue(key: String, callback: Callable = Callable()) -> void:
+	if autoplay:
+		if callback.is_valid():
+			callback.call()
+		return
 	var lines: Array = StoryManager.LINES.get(key, [])
 	state = "story"
 	get_tree().paused = true
@@ -401,6 +414,15 @@ func _open_stage_crossroad() -> void:
 
 
 func _open_choice(key: String, next_action: Callable) -> void:
+	if autoplay:
+		var note: String = run.choose_crossroad(key, 0)
+		if is_instance_valid(player):
+			player.configure(run.modifiers)
+		last_note = note
+		print("AUTOPLAY: crossroad %s -> %s" % [key, note])
+		if next_action.is_valid():
+			next_action.call()
+		return
 	state = "choice"
 	get_tree().paused = true
 	hud.set_gameplay_visible(false)
@@ -437,6 +459,9 @@ func _maybe_level_up() -> void:
 
 
 func _open_upgrade(next_action: Callable = Callable()) -> void:
+	if autoplay:
+		_autoplay_upgrade(next_action)
+		return
 	if run.pending_levels <= 0:
 		if next_action.is_valid():
 			next_action.call()
@@ -494,6 +519,8 @@ func _show_gameover() -> void:
 	if SaveManager.checkpoint.is_empty():
 		SaveManager.save_checkpoint(stage_index, run.score, 0, 0, int(run.damage_taken), run.stage_time)
 	menus.show_gameover(run.summary(), stage_index)
+	if autoplay:
+		_autoplay_end("gameover")
 
 
 func _on_boss_defeated() -> void:
@@ -516,6 +543,8 @@ func _show_victory() -> void:
 	get_tree().paused = true
 	hud.set_gameplay_visible(false)
 	menus.show_victory(run.summary())
+	if autoplay:
+		_open_ending_choice.call_deferred()
 
 
 func _open_ending_choice() -> void:
@@ -532,6 +561,8 @@ func _on_ending_chosen(_key: String, index: int) -> void:
 	state = "ending"
 	get_tree().paused = true
 	menus.show_ending(StoryManager.ending(ending_id), run.summary(), SaveManager.endings_found(), 3)
+	if autoplay:
+		_autoplay_end("ending")
 
 
 # ------------------------------------------------------------------ frame loop
@@ -550,6 +581,8 @@ func _process(delta: float) -> void:
 			_title_clock += delta
 			background.set_focus(0.5 + sin(_title_clock * 0.16) * 0.28)
 	_update_shake(delta)
+	if autoplay:
+		_autoplay_tick(delta)
 
 
 func _tick_play(delta: float) -> void:
@@ -576,6 +609,8 @@ func _tick_play(delta: float) -> void:
 
 
 func _gather_input() -> Dictionary:
+	if autoplay:
+		return _autoplay_input()
 	var move := Vector2.ZERO
 	if Input.is_action_pressed("move_left"):
 		move.x -= 1.0
@@ -1145,3 +1180,96 @@ func _input(event: InputEvent) -> void:
 		elif key == KEY_R and state == "gameover":
 			restart_stage()
 			get_viewport().set_input_as_handled()
+
+
+# ------------------------------------------------------------------ autoplay harness
+# The CI smoke test boots the export with `-- --autoplay`: no human input, the
+# whole campaign runs by itself, and any script error shows up in the log.
+func _autoplay_input() -> Dictionary:
+	var move := Vector2.ZERO
+	var attack := false
+	var shoot := false
+	var dash := false
+	var special := false
+	var heal := false
+	if is_instance_valid(player):
+		var target: Vector2 = _autoplay_target()
+		var to_target: Vector2 = target - player.position
+		var dist: float = to_target.length()
+		if dist > 1.0:
+			move = to_target.normalized() if dist > 78.0 else -to_target.normalized() * 0.35
+		attack = dist < 118.0
+		shoot = dist > 160.0 and dist < 640.0
+		special = dist < 230.0 and player.energy > player.max_energy * 0.55
+		heal = player.hp < player.max_hp * 0.45
+		dash = player.hp < player.max_hp * 0.32 or dist > 420.0
+	return {
+		"move": move,
+		"attack": attack,
+		"shoot": shoot,
+		"dash": dash,
+		"special": special,
+		"heal": heal,
+		"jump": randf() < 0.004
+	}
+
+
+func _autoplay_target() -> Vector2:
+	if not is_instance_valid(player):
+		return arena.get_center()
+	if is_instance_valid(boss) and boss.is_targetable():
+		return boss.body_center()
+	var best: Vector2 = arena.get_center()
+	var best_dist: float = INF
+	for enemy in enemies:
+		if not is_instance_valid(enemy) or not enemy.is_targetable():
+			continue
+		var distance: float = enemy.position.distance_to(player.position)
+		if distance < best_dist:
+			best_dist = distance
+			best = enemy.body_center()
+	if best_dist == INF:
+		return arena.get_center()
+	return best
+
+
+func _autoplay_upgrade(next_action: Callable) -> void:
+	if run.pending_levels <= 0:
+		if next_action.is_valid():
+			next_action.call()
+		elif state == "play" or state == "upgrade":
+			resume_play()
+		return
+	run.take_pending_level()
+	var offers: Array[Dictionary] = run.offer_upgrades(3)
+	var pick: String = "power"
+	if not offers.is_empty():
+		pick = String(offers[0].get("id", "power"))
+	print("AUTOPLAY: level %d upgrade -> %s" % [run.level, pick])
+	_on_upgrade_picked(pick, next_action)
+
+
+func _autoplay_tick(delta: float) -> void:
+	_autoplay_clock += delta
+	if _autoplay_clock - _autoplay_logged > 8.0:
+		_autoplay_logged = _autoplay_clock
+		var hp: float = 0.0
+		var max_hp: float = 0.0
+		if is_instance_valid(player):
+			hp = player.hp
+			max_hp = player.max_hp
+		print("AUTOPLAY t=%.1f state=%s stage=%d hp=%.0f/%.0f kills=%d score=%d enemies=%d" % [
+			_autoplay_clock, state, stage_index, hp, max_hp, run.kills, run.score, enemies.size()
+		])
+	if _autoplay_clock > 600.0:
+		_autoplay_end("timeout")
+
+
+func _autoplay_end(reason: String) -> void:
+	print("AUTOPLAY_RESULT reason=%s stage=%d score=%d kills=%d level=%d endings=%d" % [
+		reason, stage_index, run.score, run.kills, run.level, SaveManager.endings_found()
+	])
+	autoplay = false
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	get_tree().quit(0)
