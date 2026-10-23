@@ -945,7 +945,7 @@ func _resolve_collisions(_delta: float) -> void:
 			_check_player_shot(shot)
 		else:
 			_check_enemy_shot(shot, player_center)
-		for pickup in pickups:
+	for pickup in pickups:
 		if not is_instance_valid(pickup) or not pickup.alive:
 			continue
 		pickup.target = player.position

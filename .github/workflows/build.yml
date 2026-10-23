@@ -13,8 +13,40 @@ permissions:
   contents: write
 
 jobs:
+  smoke:
+    name: Headless smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            mv /root/.local/share/godot/export_templates/* ~/.local/share/godot/export_templates/ || true
+          fi
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Boot the game headless
+        run: |
+          set +e
+          timeout 120 godot --headless --audio-driver Dummy --path . --quit-after 240 > "$RUNNER_TEMP/boot.log" 2>&1
+          CODE=$?
+          echo "boot_exit=$CODE"
+          grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property|Cannot open file|Condition .* is true" "$RUNNER_TEMP/boot.log" | head -n 24 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$(echo "$line" | cut -c1-320)"; done
+          if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property" "$RUNNER_TEMP/boot.log"; then
+            exit 1
+          fi
+          test $CODE -eq 0
+
   windows:
     name: Windows .exe
+    needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
     container:
@@ -46,6 +78,7 @@ jobs:
 
   android:
     name: Android .apk
+    needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
     container:

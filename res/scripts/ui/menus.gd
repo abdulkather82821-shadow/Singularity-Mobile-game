@@ -226,7 +226,7 @@ func _toggle(key: String, title_text: String) -> void:
 	var enabled: bool = bool(SaveManager.settings.get(key, true))
 	var row := UI.button(
 		_box,
-		"%s%s" % [title_text.ljust(34, " "), "ON" if enabled else "OFF"],
+		"%s%s" % [title_text.lpad(34, " "), "ON" if enabled else "OFF"],
 		func() -> void: _flip_setting(key),
 		CYAN if enabled else Color(0.45, 0.50, 0.64),
 		540.0
