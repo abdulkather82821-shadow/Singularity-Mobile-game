@@ -1486,10 +1486,8 @@ func _shot_mode(mode: String) -> void:
 		var f2: Vector2 = camera_rig.camera.unproject_position(player.global_position)
 		var h2: Vector2 = camera_rig.camera.unproject_position(
 			player.global_position + Vector3(0.0, player.rig.height, 0.0))
-		var r_up: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, 0.9, 0.0))
-		var r_dn: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, -0.9, 0.0))
-		print("SHOT live feet=%s head=%s player_px=%.0f ruler_px=%.0f cam=%s dist=%.2f" % [
-			str(f2), str(h2), absf(f2.y - h2.y), absf(r_up.y - r_dn.y),
+		print("SHOT live feet=%s head=%s player_px=%.0f cam=%s dist=%.2f" % [
+			str(f2), str(h2), absf(f2.y - h2.y),
 			str(camera_rig.camera.global_position),
 			player.global_position.distance_to(camera_rig.camera.global_position)
 		])
