@@ -36,6 +36,8 @@ var shots_fired: int = 0
 var hits_landed: int = 0
 var perfect_stage: bool = true
 var modifiers: Dictionary = {}
+var active_class: String = "vessel"
+var class_switch_cd: float = 0.0
 var _score_float: float = 0.0
 
 
@@ -58,6 +60,8 @@ func reset_run() -> void:
 	xp_needed = xp_for_level(1)
 	pending_levels = 0
 	upgrades = {}
+	active_class = "vessel"
+	class_switch_cd = 0.0
 	damage_taken = 0.0
 	shots_fired = 0
 	hits_landed = 0
@@ -80,6 +84,7 @@ func begin_stage(index: int, carried_kills: int = 0) -> void:
 
 func tick(delta: float) -> void:
 	stage_time += delta
+	class_switch_cd = maxf(0.0, class_switch_cd - delta)
 	if combo_timer > 0.0:
 		combo_timer -= delta
 		if combo_timer <= 0.0 and combo_mult > 1.0:
@@ -142,6 +147,27 @@ func xp_for_level(target_level: int) -> int:
 
 func xp_ratio() -> float:
 	return clampf(float(xp) / float(maxi(1, xp_needed)), 0.0, 1.0)
+
+
+func class_def() -> Dictionary:
+	return GameConfig.class_def(active_class)
+
+
+func can_switch_class() -> bool:
+	return class_switch_cd <= 0.0
+
+
+func switch_class(id: String) -> bool:
+	if not GameConfig.CLASSES.has(id) or id == active_class or not can_switch_class():
+		return false
+	active_class = id
+	class_switch_cd = GameConfig.CLASS_SWITCH_COOLDOWN
+	return true
+
+
+func cycle_class() -> bool:
+	var index: int = GameConfig.class_index(active_class)
+	return switch_class(GameConfig.class_for_index(index + 1))
 
 
 func upgrade_rank(id: String) -> int:

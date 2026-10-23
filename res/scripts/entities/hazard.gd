@@ -1,108 +1,114 @@
 # gdlint: disable=max-line-length
 class_name Hazard
-extends Node2D
-## Telegraphed ground danger: a warning ring, then a live damage zone.
-## Used by stage hazards, Katleen's nova marks and her summoning circles.
+extends Node3D
+## Ground hazard in 3D: a burning rune circle that warns, ignites, then fades.
+## Katleen's nova and the rift's burning ground both use it.
 
-var radius: float = 74.0
+var radius: float = 2.3
 var damage: float = 13.0
-var warning: float = 1.15
-var active_time: float = 0.55
+var warn: float = 1.15
+var live: float = 0.55
+var color: Color = Color(1.0, 0.4, 0.36)
 var kind: String = "burn"
-var color: Color = Color(1.0, 0.42, 0.36)
 var alive: bool = true
-var used: bool = false
-var phase: String = "warning"
-var arena: Rect2 = Rect2()
+var state: String = "warn"
+
+var _disc: MeshInstance3D
+var _ring: MeshInstance3D
+var _material: StandardMaterial3D
 var _time: float = 0.0
 var _timer: float = 0.0
-var _rune_rotation: float = 0.0
+var _fade: float = 0.0
 
 
-func setup(
-	pos: Vector2,
-	zone_radius: float,
-	zone_damage: float,
-	warn_time: float,
-	live_time: float,
-	tone: Color,
-	zone_kind: String = "burn"
-) -> void:
-	position = pos
-	radius = zone_radius
-	damage = zone_damage
-	warning = warn_time
-	active_time = live_time
-	color = tone
-	kind = zone_kind
-	_timer = 0.0
-	phase = "warning"
-	z_index = 2
-	_rune_rotation = randf() * TAU
-	queue_redraw()
+func setup(center: Vector3, new_radius: float, new_damage: float, new_warn: float, new_live: float, new_color: Color, new_kind: String) -> void:
+	position = Vector3(center.x, 0.02, center.z)
+	radius = maxf(0.2, new_radius)
+	damage = new_damage
+	warn = maxf(0.05, new_warn)
+	live = maxf(0.05, new_live)
+	color = new_color
+	kind = new_kind
+	_timer = warn
+	if kind == "telegraph" or damage <= 0.0:
+		state = "fade"
+		_fade = maxf(0.15, live)
+	_build()
+
+
+func _build() -> void:
+	var disc_mesh := CylinderMesh.new()
+	disc_mesh.top_radius = radius
+	disc_mesh.bottom_radius = radius
+	disc_mesh.height = 0.04
+	_disc = MeshInstance3D.new()
+	_disc.mesh = disc_mesh
+	_material = StandardMaterial3D.new()
+	_material.albedo_color = Color(color.r, color.g, color.b, 0.35)
+	_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_material.emission_enabled = true
+	_material.emission = color
+	_material.emission_energy_multiplier = 1.4
+	_disc.material_override = _material
+	_disc.position = Vector3(0.0, 0.01, 0.0)
+	add_child(_disc)
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = radius * 0.94
+	ring_mesh.outer_radius = radius
+	_ring = MeshInstance3D.new()
+	_ring.mesh = ring_mesh
+	var ring_material := StandardMaterial3D.new()
+	ring_material.albedo_color = Color(color.r, color.g, color.b, 0.9)
+	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ring_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	ring_material.emission_enabled = true
+	ring_material.emission = color
+	ring_material.emission_energy_multiplier = 2.4
+	_ring.material_override = ring_material
+	_ring.position = Vector3(0.0, 0.05, 0.0)
+	add_child(_ring)
+
+
+func is_dangerous() -> bool:
+	return state == "active" and damage > 0.0
+
+
+func consume() -> void:
+	if state == "active":
+		state = "fade"
+		_fade = 0.25
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	_timer += delta
-	if phase == "warning" and _timer >= warning:
-		phase = "active"
-		_timer = 0.0
-	elif phase == "active" and _timer >= active_time:
-		phase = "fade"
-		_timer = 0.0
-	elif phase == "fade" and _timer >= 0.45:
-		alive = false
-	queue_redraw()
-
-
-func progress() -> float:
-	if phase == "warning":
-		return clampf(_timer / maxf(0.01, warning), 0.0, 1.0)
-	if phase == "active":
-		return 1.0
-	return 0.0
-
-
-func is_dangerous() -> bool:
-	return phase == "active" and not used
-
-
-func consume() -> void:
-	used = true
-
-
-func _draw() -> void:
-	var pulse: float = 0.5 + 0.5 * sin(_time * 6.0)
-	var base_alpha: float = 0.30
-	if phase == "warning":
-		var p: float = progress()
-		draw_polyline(_closed(Shapes.ellipse(Vector2.ZERO, radius, radius * 0.42, 40)), Color(color.r, color.g, color.b, 0.55), 2.4)
-		draw_colored_polygon(Shapes.ellipse(Vector2.ZERO, radius * p, radius * 0.42 * p, 40), Color(color.r, color.g, color.b, 0.16 + 0.18 * p))
-		draw_arc(Vector2.ZERO, radius * p, 0.0, TAU, 44, Color(color.r, color.g, color.b, 0.72), 3.0)
-		for i in 6:
-			var a: float = _rune_rotation + float(i) * TAU / 6.0
-			var p1: Vector2 = Vector2(cos(a), sin(a) * 0.42) * radius * 0.82
-			draw_line(p1, p1 * 0.62, Color(color.r, color.g, color.b, 0.4), 2.0)
-	elif phase == "active":
-		base_alpha = 0.5 + 0.22 * pulse
-		draw_colored_polygon(Shapes.ellipse(Vector2.ZERO, radius, radius * 0.44, 44), Color(color.r, color.g, color.b, base_alpha * 0.55))
-		draw_arc(Vector2.ZERO, radius * (0.86 + 0.1 * pulse), 0.0, TAU, 48, Color(1, 0.95, 0.8, 0.85), 3.4)
-		for i in 8:
-			var a2: float = -_time * 1.4 + float(i) * TAU / 8.0
-			var from_p: Vector2 = Vector2(cos(a2), sin(a2) * 0.44) * radius * 0.5
-			var to_p: Vector2 = Vector2(cos(a2), sin(a2) * 0.44) * radius * 0.98
-			draw_line(from_p, to_p, Color(1.0, 0.92, 0.72, 0.35 * pulse), 2.0)
-		if kind == "nova":
-			draw_arc(Vector2.ZERO, radius * 0.55, _time * 2.0, _time * 2.0 + PI * 1.4, 30, Color(1, 1, 1, 0.5), 2.0)
-	else:
-		var fade: float = 1.0 - clampf(_timer / 0.45, 0.0, 1.0)
-		draw_colored_polygon(Shapes.ellipse(Vector2.ZERO, radius * (1.0 + (1.0 - fade) * 0.25), radius * 0.44, 40), Color(color.r, color.g, color.b, 0.22 * fade))
-		draw_arc(Vector2.ZERO, radius, 0.0, TAU, 44, Color(color.r, color.g, color.b, 0.35 * fade), 2.0)
-
-
-func _closed(points: PackedVector2Array) -> PackedVector2Array:
-	var out := points.duplicate()
-	if out.size() > 1:
-		out.append(out[0])
-	return out
+	_ring.rotation.y += delta * 1.6
+	_disc.rotation.y -= delta * 0.8
+	match state:
+		"warn":
+			_timer -= delta
+			var ratio: float = clampf(1.0 - _timer / warn, 0.0, 1.0)
+			var pulse: float = 0.85 + 0.15 * sin(_time * 14.0)
+			scale = Vector3(pulse, 1.0, pulse) * lerpf(0.8, 1.0, ratio)
+			_material.albedo_color = Color(color.r, color.g, color.b, lerpf(0.12, 0.42, ratio))
+			if _timer <= 0.0:
+				state = "active"
+				_timer = live
+				scale = Vector3.ONE
+		"active":
+			_timer -= delta
+			_material.albedo_color = Color(color.r, color.g, color.b, 0.6 + sin(_time * 20.0) * 0.12)
+			_material.emission_energy_multiplier = 2.6 + sin(_time * 16.0) * 0.5
+			if _timer <= 0.0:
+				state = "fade"
+				_fade = 0.35
+		"fade":
+			_fade -= delta
+			var alpha: float = clampf(_fade / 0.35, 0.0, 1.0)
+			_material.albedo_color = Color(color.r, color.g, color.b, 0.3 * alpha)
+			if is_instance_valid(_ring) and _ring.material_override is StandardMaterial3D:
+				(_ring.material_override as StandardMaterial3D).albedo_color = Color(color.r, color.g, color.b, alpha)
+			if _fade <= 0.0:
+				alive = false

@@ -1,97 +1,103 @@
 # gdlint: disable=max-line-length
 class_name Pickup
-extends Node2D
-## Floating pickup: energy mote, health shard, rift core or an XP orb.
+extends Node3D
+## Floating 3D pickups: experience shards, energy motes, healing wisps and
+## vessel cores. They leash toward Ajees once he is close enough.
 
-var kind: String = "energy"
-var amount: float = 20.0
-var life: float = 16.0
+var kind: String = "xp"
+var value: float = 7.0
+var color: Color = Color(0.8, 0.6, 1.0)
 var alive: bool = true
-var collected: bool = false
-var radius: float = 16.0
-var color: Color = Color(0.4, 0.9, 1.0)
-var target: Vector2 = Vector2.ZERO
-var magnet_range: float = 0.0
+var target: Vector3 = Vector3.ZERO
+var magnet_range: float = 3.8
+var label_text: String = ""
+
+var _core: MeshInstance3D
+var _ring: Node3D
 var _time: float = 0.0
-var _base_y: float = 0.0
-var _pull: float = 0.0
+var _base_y: float = 0.55
+var _speed: float = 2.4
 
 
-func setup(pickup_kind: String, pos: Vector2, value: float, tone: Color) -> void:
-	kind = pickup_kind
-	position = pos
-	_base_y = pos.y
-	amount = value
-	color = tone
-	z_index = 8
+func setup(new_kind: String, point: Vector3, new_value: float = 0.0) -> void:
+	kind = new_kind
+	position = point
+	_base_y = 0.55 + randf() * 0.2
+	position.y = _base_y
 	match kind:
+		"energy":
+			color = Color(0.35, 0.86, 1.0)
+			value = GameConfig.PICKUP_ENERGY if new_value <= 0.0 else new_value
+			label_text = "EN"
 		"heal":
-			radius = 17.0
-			life = 18.0
+			color = Color(0.4, 1.0, 0.68)
+			value = GameConfig.PICKUP_HEAL if new_value <= 0.0 else new_value
+			label_text = "HP"
 		"core":
-			radius = 20.0
-			life = 22.0
-		"xp":
-			radius = 9.0
-			life = 26.0
+			color = Color(1.0, 0.82, 0.42)
+			value = 45.0 if new_value <= 0.0 else new_value
+			label_text = "CORE"
+			_base_y = 0.75
 		_:
-			radius = 16.0
-			life = 16.0
-	queue_redraw()
+			color = Color(0.78, 0.55, 1.0)
+			value = float(GameConfig.XP_ORB) if new_value <= 0.0 else new_value
+			label_text = "XP"
+	_build()
+
+
+func _build() -> void:
+	var core_mesh := SphereMesh.new()
+	core_mesh.radius = 0.17 if kind != "core" else 0.26
+	core_mesh.height = core_mesh.radius * 2.0
+	_core = MeshInstance3D.new()
+	_core.mesh = core_mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.emission_enabled = true
+	material.emission = color
+	material.emission_energy_multiplier = 2.6
+	_core.material_override = material
+	add_child(_core)
+	_ring = Node3D.new()
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.24
+	ring_mesh.outer_radius = 0.31
+	var ring_node := MeshInstance3D.new()
+	ring_node.mesh = ring_mesh
+	var ring_material := StandardMaterial3D.new()
+	ring_material.albedo_color = Color(color.r, color.g, color.b, 0.75)
+	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ring_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	ring_material.emission_enabled = true
+	ring_material.emission = color
+	ring_material.emission_energy_multiplier = 1.8
+	ring_node.material_override = ring_material
+	_ring.add_child(ring_node)
+	add_child(_ring)
 
 
 func _process(delta: float) -> void:
+	if not alive:
+		return
 	_time += delta
-	life -= delta
-	if life <= 0.0:
-		alive = false
-	var offset: Vector2 = target - position
-	var distance: float = offset.length()
-	if magnet_range > 0.0 and distance < magnet_range and distance > 1.0:
-		_pull = minf(1.0, _pull + delta * 3.0)
-		position += offset.normalized() * (140.0 + 320.0 * _pull) * delta
-	else:
-		_pull = maxf(0.0, _pull - delta * 1.5)
-		position.y = _base_y + sin(_time * 2.2) * 4.0
-		if absf(position.y - _base_y) > 1.0:
-			_base_y = lerpf(_base_y, position.y, 0.5)
-	queue_redraw()
+	position.y = _base_y + sin(_time * 2.6) * 0.14
+	_ring.rotation.y += delta * 2.6
+	_ring.rotation.x = sin(_time * 1.4) * 0.4
+	var to_target: Vector3 = target - position
+	to_target.y = 0.0
+	var distance: float = to_target.length()
+	if distance < magnet_range and distance > 0.01:
+		var pull: float = clampf((magnet_range - distance) / magnet_range, 0.0, 1.0)
+		_speed = 2.0 + 9.0 * pull
+		position += to_target.normalized() * _speed * delta
+		_base_y = position.y
 
 
-func _draw() -> void:
-	var fade: float = clampf(life, 0.0, 1.0)
-	var bob: float = sin(_time * 3.0) * 3.0
-	var center := Vector2(0, -14.0 + bob)
-	Shapes.shadow(self, Vector2(0, 2), radius * 0.8, radius * 0.28, 0.28 * fade)
-	Shapes.glow(self, center, radius * 1.9, Color(color.r, color.g, color.b, 0.42 * fade), 4)
-	match kind:
-		"heal":
-			var cross := PackedVector2Array([
-				center + Vector2(-4, -12), center + Vector2(4, -12), center + Vector2(4, -4),
-				center + Vector2(12, -4), center + Vector2(12, 4), center + Vector2(4, 4),
-				center + Vector2(4, 12), center + Vector2(-4, 12), center + Vector2(-4, 4),
-				center + Vector2(-12, 4), center + Vector2(-12, -4), center + Vector2(-4, -4)
-			])
-			draw_colored_polygon(cross, Color(color.r, color.g, color.b, fade))
-		"core":
-			var spin: float = _time * 1.4
-			var outer := Shapes.star(center, 4, radius * 1.3, radius * 0.42, spin)
-			draw_colored_polygon(outer, Color(color.r, color.g, color.b, 0.85 * fade))
-			draw_circle(center, radius * 0.4, Color(1, 1, 1, 0.95 * fade))
-		"xp":
-			var orb := Shapes.ellipse(center, radius * 0.8, radius * 1.15, 16)
-			draw_colored_polygon(orb, Color(color.r, color.g, color.b, 0.9 * fade))
-			draw_circle(center + Vector2(-2, -3), radius * 0.3, Color(1, 1, 1, 0.8 * fade))
-		_:
-			var spin2: float = _time * 2.2
-			draw_colored_polygon(Shapes.diamond(center, radius * 0.7, radius), Color(color.r, color.g, color.b, 0.92 * fade))
-			draw_polyline(_closed(Shapes.diamond(center, radius * 0.7, radius)), Color(1, 1, 1, 0.5 * fade), 1.2)
-			draw_circle(center, radius * 0.24, Color(1, 1, 1, 0.9 * fade))
-			draw_arc(center, radius * 1.3, spin2, spin2 + PI, 12, Color(color.r, color.g, color.b, 0.5 * fade), 1.6)
+func collect() -> void:
+	alive = false
 
 
-func _closed(points: PackedVector2Array) -> PackedVector2Array:
-	var out := points.duplicate()
-	if out.size() > 1:
-		out.append(out[0])
-	return out
+func body_center() -> Vector3:
+	return position

@@ -1,6 +1,7 @@
-# Builds the Android APK and the Windows executable on GitHub's runners.
-# Start it from the Actions tab ("Run workflow") or push to main.
-# Artifacts appear under the run's "Artifacts" section.
+# Builds the Windows executable and the Android APK on GitHub's runners, after
+# booting the game headless and playing a full unattended campaign.
+# Both binaries are attached to the run as artifacts and to the rolling
+# "latest-build" release, so they always have a stable download URL.
 name: Build binaries
 
 on:
@@ -8,12 +9,57 @@ on:
   push:
     branches: [main, "arena/**"]
 
-env:
-  GODOT_VERSION: "4.3"
+permissions:
+  contents: write
 
 jobs:
+  smoke:
+    name: Headless smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            mv /root/.local/share/godot/export_templates/* ~/.local/share/godot/export_templates/ || true
+          fi
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Boot the 3D game headless
+        run: |
+          set +e
+          timeout 120 godot --headless --audio-driver Dummy --path . --quit-after 240 > "$RUNNER_TEMP/boot.log" 2>&1
+          CODE=$?
+          echo "boot_exit=$CODE"
+          grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property|Cannot open file" "$RUNNER_TEMP/boot.log" | head -n 24 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$(echo "$line" | cut -c1-320)"; done
+          if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property" "$RUNNER_TEMP/boot.log"; then
+            exit 1
+          fi
+          test $CODE -eq 0
+
+      - name: Play the whole campaign unattended
+        run: |
+          set +e
+          timeout 900 godot --headless --audio-driver Dummy --path . -- --autoplay > "$RUNNER_TEMP/play.log" 2>&1
+          CODE=$?
+          echo "play_exit=$CODE"
+          grep -E "AUTOPLAY" "$RUNNER_TEMP/play.log" | tail -n 10 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$(echo "$line" | cut -c1-300)"; done
+          if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property" "$RUNNER_TEMP/play.log"; then
+            grep -E "SCRIPT ERROR|Parse Error|Failed to load script|Invalid call|Nonexistent function|Cannot find property" "$RUNNER_TEMP/play.log" | head -n 10 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$(echo "$line" | cut -c1-320)"; done
+            exit 1
+          fi
+          grep -q "AUTOPLAY_RESULT" "$RUNNER_TEMP/play.log" || { echo "::error::the unattended run never finished"; exit 1; }
+
   windows:
     name: Windows .exe
+    needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
     container:
@@ -35,6 +81,7 @@ jobs:
         run: |
           mkdir -p build/windows
           godot --headless --path . --export-release "Windows Desktop" build/windows/SINGULARITY.exe
+          ls -l build/windows/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -44,6 +91,7 @@ jobs:
 
   android:
     name: Android .apk
+    needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
     container:
@@ -61,47 +109,109 @@ jobs:
       - name: Import project
         run: godot --headless --path . --import || true
 
-      - name: Probe Android toolchain
+      - name: Android toolchain
         run: |
-          echo "::warning::ANDROID_HOME=${ANDROID_HOME:-unset} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset} JAVA_HOME=${JAVA_HOME:-unset}"
-          echo "::warning::keytool=$(command -v keytool || echo missing) sdkmanager=$(command -v sdkmanager || echo missing)"
-          echo "::warning::sdk dirs: $(ls -d /root/android-sdk /opt/android-sdk /usr/lib/android-sdk /root/Android/Sdk 2>/dev/null | tr '\n' ' ')"
+          set +e
+          LOG="$RUNNER_TEMP/android-toolchain.log"
+          {
+            set -x
+            if command -v java >/dev/null 2>&1; then
+              DETECTED=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+              echo "JAVA_HOME=$DETECTED" >> "$GITHUB_ENV"
+            fi
+            SDKM=$(command -v sdkmanager)
+            yes | "$SDKM" --licenses
+            "$SDKM" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+            ls /usr/lib/android-sdk/platforms /usr/lib/android-sdk/build-tools
+          } > "$LOG" 2>&1
+          tail -c 1500 "$LOG" | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$line"; done
+          exit 0
+
+      - name: Configure editor settings
+        run: |
+          set +e
+          LOG="$RUNNER_TEMP/editor-settings.log"
+          {
+            set -x
+            JAVA=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+            SDK="${ANDROID_HOME:-/usr/lib/android-sdk}"
+            mkdir -p "$HOME/.config/godot"
+            printf '%s\n' \
+              '[gd_resource type="EditorSettings" format=3]' \
+              '' \
+              '[resource]' \
+              "export/android/java_sdk_path = \"$JAVA\"" \
+              "export/android/android_sdk_path = \"$SDK\"" \
+              > "$HOME/.config/godot/editor_settings-4.3.tres"
+            mkdir -p /root/.config/godot
+            cp "$HOME/.config/godot/editor_settings-4.3.tres" /root/.config/godot/ 2>/dev/null
+            cat "$HOME/.config/godot/editor_settings-4.3.tres"
+          } > "$LOG" 2>&1
+          tail -c 1200 "$LOG" | tac | sed 's/%/%25/g' | head -n 6 | while IFS= read -r line; do echo "::error::$line"; done
+          test -s "$HOME/.config/godot/editor_settings-4.3.tres"
 
       - name: Debug keystore
         run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.android"
-          KEYSTORE="$HOME/.android/debug.keystore"
-          if [ ! -f "$KEYSTORE" ]; then
-            if ! command -v keytool >/dev/null 2>&1; then
-              echo "::error::keytool not found in the container - no JDK for signing"
-              exit 1
-            fi
-            keytool -genkeypair -v -keystore "$KEYSTORE" \
-              -storepass android -keypass android \
-              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
-          fi
-          sed -i "s|keystore/debug=\"\"|keystore/debug=\"$KEYSTORE\"|" export_presets.cfg
-          sed -i 's|keystore/debug_user=""|keystore/debug_user="androiddebugkey"|' export_presets.cfg
-          sed -i 's|keystore/debug_password=""|keystore/debug_password="android"|' export_presets.cfg
-          echo "::warning::preset: $(grep 'keystore/debug' export_presets.cfg | tr '\n' ' ')"
+          set +e
+          LOG="$RUNNER_TEMP/keystore.log"
+          {
+            set -x
+            mkdir -p "$HOME/.android"
+            KEYSTORE="$HOME/.android/debug.keystore"
+            rm -f "$KEYSTORE"
+            keytool -genkeypair -keystore "$KEYSTORE" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            echo "keytool_exit=$?"
+            sed -i "s|^keystore/debug=.*|keystore/debug=\"$KEYSTORE\"|" export_presets.cfg
+            sed -i 's|^keystore/debug_user=.*|keystore/debug_user="androiddebugkey"|' export_presets.cfg
+            sed -i 's|^keystore/debug_password=.*|keystore/debug_password="android"|' export_presets.cfg
+            grep -nE "^keystore/" export_presets.cfg
+          } > "$LOG" 2>&1
+          tail -c 1800 "$LOG" | tac | sed 's/%/%25/g' | head -n 10 | while IFS= read -r line; do echo "::error::$line"; done
+          grep -q '^keystore/debug="/' export_presets.cfg
 
       - name: Export Android build
         run: |
           mkdir -p build/android
           set +e
-          OUTPUT=$(godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk 2>&1)
+          LOG="$RUNNER_TEMP/apk-export.log"
+          godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk > "$LOG" 2>&1
           CODE=$?
-          echo "$OUTPUT"
-          if [ $CODE -ne 0 ]; then
-            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail" | tail -n 6 | tr '\n' '|' | cut -c1-900)
-            echo "::error::APK export failed (exit $CODE): $MSG"
-            exit $CODE
-          fi
+          echo "export_exit=$CODE"
+          grep -vE "daemon at tcp:5037" "$LOG" | sed 's/%/%25/g' | awk '{ buf = buf $0 " ;; "; if (NR % 12 == 0) { print "::error::" buf; buf = "" } } END { if (buf != "") print "::error::" buf }' | head -n 10
+          ls -l build/android/
+          test $CODE -eq 0
+          test -s build/android/SINGULARITY.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: SINGULARITY-android
           path: build/android/SINGULARITY.apk
           if-no-files-found: error
+
+  publish:
+    name: Publish download links
+    needs: [windows, android]
+    if: always() && (needs.windows.result == 'success' || needs.android.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Show what was built
+        run: find dist -type f -printf '%p %s bytes\n' | sort
+
+      - name: Update rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-build
+          name: Latest automated build
+          body: |
+            Binaries produced by the "Build binaries" workflow from `${{ github.ref_name }}` at ${{ github.sha }}.
+            Windows: unzip `SINGULARITY-windows.zip` and run `SINGULARITY.exe`.
+            Android: install `SINGULARITY.apk` (debug-signed; allow "install from unknown sources").
+          files: dist/**/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

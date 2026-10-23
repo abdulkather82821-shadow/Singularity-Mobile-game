@@ -30,6 +30,9 @@ var _chip_dash: Label
 var _chip_burst: Label
 var _chip_mend: Label
 var _chip_ally: Label
+var _chip_ult: Label
+var _class_label: Label
+var _ult_bar: Dictionary
 var _hint: Label
 var _notice_title: Label
 var _notice_sub: Label
@@ -100,6 +103,16 @@ func _build_vitals(parent: Node) -> void:
 	UI.label(energy_row, "EN", 14, ENERGY_COLOR)
 	_energy_bar = UI.bar(energy_row, ENERGY_COLOR, Color(0.05, 0.09, 0.13, 0.85), Vector2(220, 10))
 	_energy_text = UI.label(energy_row, "100", 12, Color(0.80, 0.90, 1.0))
+	var class_row := HBoxContainer.new()
+	class_row.add_theme_constant_override("separation", 8)
+	box.add_child(class_row)
+	UI.label(class_row, "CLASS", 13, Color(0.74, 0.84, 1.0))
+	_class_label = UI.label(class_row, "VESSEL", 13, Color(0.42, 0.86, 1.0))
+	var ult_row := HBoxContainer.new()
+	ult_row.add_theme_constant_override("separation", 8)
+	box.add_child(ult_row)
+	UI.label(ult_row, "ULT", 13, Color(1.0, 0.79, 0.45))
+	_ult_bar = UI.bar(ult_row, Color(1.0, 0.72, 0.35), Color(0.14, 0.09, 0.04, 0.85), Vector2(220, 8))
 
 
 func _build_middle(parent: Node) -> void:
@@ -151,6 +164,7 @@ func _build_bottom(parent: Node) -> void:
 	_chip_burst = _chip(abilities, "BURST", Color(0.98, 0.80, 0.42))
 	_chip_mend = _chip(abilities, "MEND", Color(0.44, 0.98, 0.66))
 	_chip_ally = _chip(abilities, "SARA", Color(0.95, 0.55, 0.90))
+	_chip_ult = _chip(abilities, "ULT", Color(1.0, 0.76, 0.36))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -236,6 +250,12 @@ func refresh(player: Player, run: RunState, boss: Boss) -> void:
 		UI.set_bar(_energy_bar, player.energy / maxf(1.0, player.max_energy))
 		_hp_text.text = "%d" % int(ceil(player.hp))
 		_energy_text.text = "%d" % int(player.energy)
+		var info: Dictionary = GameConfig.class_def(player.class_id)
+		_class_label.text = String(info.get("name", "VESSEL"))
+		_class_label.add_theme_color_override("font_color", info.get("color", Color(0.42, 0.86, 1.0)))
+		UI.set_bar(_ult_bar, clampf(player.ult_charge / GameConfig.ULT_MAX, 0.0, 1.0))
+		_chip_ult.modulate.a = 1.0 if player.ult_ready else 0.34
+		_chip_ult.text = "ULT !" if player.ult_ready else "ULT"
 		_chip_dash.modulate.a = 0.35 if player.dash_cd > 0.0 else 1.0
 		_chip_burst.modulate.a = 0.35 if player.special_cd > 0.0 or player.energy < GameConfig.SPECIAL_COST else 1.0
 		var mend_ready: bool = bool(player.mods.get("heal_unlocked", false)) and player.mend_cd <= 0.0
@@ -312,6 +332,9 @@ func set_gameplay_visible(value: bool) -> void:
 
 
 func reset() -> void:
+	_class_label.text = "VESSEL"
+	UI.set_bar(_ult_bar, 0.0)
+	_chip_ult.text = "ULT"
 	_notice_time = 0.0
 	_notice_box.modulate.a = 0.0
 	_hint.text = ""

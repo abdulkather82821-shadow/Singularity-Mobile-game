@@ -214,6 +214,75 @@ const COL_GREEN: Color = Color(0.35, 0.96, 0.69)
 const COL_TEXT: Color = Color(0.93, 0.95, 1.0)
 const COL_MUTED: Color = Color(0.62, 0.66, 0.82)
 
+# ---------------------------------------------------------------- 3d arena
+const ARENA_HALF_X: float = 20.0
+const ARENA_HALF_Z: float = 13.0
+const GROUND_Y: float = 0.0
+
+const CAMERA_OFFSET: Vector3 = Vector3(0.0, 9.4, 12.6)
+const CAMERA_LOOK_HEIGHT: float = 1.35
+const CAMERA_FOV: float = 48.0
+const CAMERA_FOLLOW: float = 5.2
+
+const PLAYER_SPEED_3D: float = 6.6
+const PLAYER_ACCEL_3D: float = 18.0
+const GRAVITY_3D: float = 26.0
+const JUMP_VELOCITY_3D: float = 8.4
+const DASH_SPEED_3D: float = 18.5
+const MELEE_RANGE_3D: float = 3.0
+const MELEE_ARC_3D: float = 120.0
+const MELEE_HEIGHT_3D: float = 1.9
+const PROJECTILE_SPEED_3D: float = 26.0
+const PROJECTILE_LIFE_3D: float = 1.15
+const SPECIAL_RADIUS_3D: float = 5.6
+const PICKUP_MAGNET_3D: float = 3.8
+const HAZARD_RADIUS_3D: float = 2.3
+const BOSS_RADIUS_3D: float = 1.6
+const ENEMY_SEPARATION_3D: float = 1.15
+const BODY_HEIGHT_3D: float = 1.05
+
+# ---------------------------------------------------------------- power system
+const ULT_MAX: float = 100.0
+const ULT_GAIN_HIT: float = 2.4
+const ULT_GAIN_KILL: float = 9.0
+const CLASS_SWITCH_COOLDOWN: float = 0.85
+
+## Three playable Vessel classes. Each one owns four abilities - a melee chain,
+## a rift shot, a class special and an ultimate - for twelve powers in total.
+const CLASSES: Dictionary = {
+	"vessel": {
+		"id": "vessel", "name": "VESSEL", "tag": "BALANCED - RIFT ENERGY",
+		"color": Color(0.42, 0.86, 1.0), "accent": Color(0.86, 0.97, 1.0),
+		"melee": [16.0, 16.0, 27.0], "melee_cd": 0.32, "melee_range": 3.0,
+		"shot_damage": 13.0, "shot_cost": 7.0, "shot_cd": 0.30, "shots": 1, "spread": 0.0,
+		"special_name": "SINGULARITY BURST", "special_damage": 38.0, "special_cd": 2.4,
+		"special_cost": 45.0, "special_radius": 5.6,
+		"ult_name": "VESSEL UNBOUND", "ult_damage": 130.0, "ult_radius": 9.0,
+		"weapon": "", "hair": "short", "coat": Color(0.14, 0.16, 0.26), "trim": Color(0.42, 0.62, 0.92)
+	},
+	"blade": {
+		"id": "blade", "name": "BLADE", "tag": "MELEE - CRIMSON EDGE",
+		"color": Color(1.0, 0.55, 0.45), "accent": Color(1.0, 0.82, 0.62),
+		"melee": [20.0, 20.0, 36.0], "melee_cd": 0.24, "melee_range": 3.4,
+		"shot_damage": 9.0, "shot_cost": 6.0, "shot_cd": 0.24, "shots": 1, "spread": 0.0,
+		"special_name": "BLADE RUSH", "special_damage": 52.0, "special_cd": 2.0,
+		"special_cost": 38.0, "special_radius": 3.8,
+		"ult_name": "THOUSAND CUTS", "ult_damage": 165.0, "ult_radius": 7.5,
+		"weapon": "blade", "hair": "spike", "coat": Color(0.24, 0.12, 0.16), "trim": Color(0.95, 0.35, 0.32)
+	},
+	"caster": {
+		"id": "caster", "name": "CASTER", "tag": "RANGED - ARCANA",
+		"color": Color(0.72, 0.45, 1.0), "accent": Color(0.92, 0.82, 1.0),
+		"melee": [11.0, 11.0, 17.0], "melee_cd": 0.38, "melee_range": 2.6,
+		"shot_damage": 17.0, "shot_cost": 8.0, "shot_cd": 0.36, "shots": 3, "spread": 7.0,
+		"special_name": "RIFT STORM", "special_damage": 30.0, "special_cd": 2.7,
+		"special_cost": 42.0, "special_radius": 6.4,
+		"ult_name": "SINGULARITY RAIN", "ult_damage": 110.0, "ult_radius": 10.0,
+		"weapon": "staff", "hair": "long", "coat": Color(0.16, 0.12, 0.3), "trim": Color(0.72, 0.45, 1.0)
+	}
+}
+const CLASS_ORDER: Array[String] = ["vessel", "blade", "caster"]
+
 # ---------------------------------------------------------------- helpers
 func arena_rect() -> Rect2:
 	var size: Vector2 = get_viewport().get_visible_rect().size if is_inside_tree() else Vector2(BASE_WIDTH, BASE_HEIGHT)
@@ -238,3 +307,35 @@ func upgrade_def(id: String) -> Dictionary:
 		if def["id"] == id:
 			return def
 	return {}
+
+
+func class_def(id: String) -> Dictionary:
+	return CLASSES.get(id, CLASSES["vessel"])
+
+
+func class_index(id: String) -> int:
+	return maxi(0, CLASS_ORDER.find(id))
+
+
+func class_for_index(index: int) -> String:
+	return CLASS_ORDER[clampi(index, 0, CLASS_ORDER.size() - 1)]
+
+
+func arena_center() -> Vector3:
+	return Vector3(0.0, 0.0, 0.0)
+
+
+func clamp_to_arena(point: Vector3) -> Vector3:
+	return Vector3(
+		clampf(point.x, -ARENA_HALF_X + 0.8, ARENA_HALF_X - 0.8),
+		0.0,
+		clampf(point.z, -ARENA_HALF_Z + 0.8, ARENA_HALF_Z - 0.8)
+	)
+
+
+func random_arena_point(margin: float = 1.5) -> Vector3:
+	return Vector3(
+		randf_range(-ARENA_HALF_X + margin, ARENA_HALF_X - margin),
+		0.0,
+		randf_range(-ARENA_HALF_Z + margin, ARENA_HALF_Z - margin)
+	)

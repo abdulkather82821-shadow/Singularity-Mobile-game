@@ -122,7 +122,8 @@ TARGETS = {
     "dialogue": "res/scripts/ui/dialogue_box.gd",
     "touch": "res/scripts/ui/touch_controls.gd",
     "effects": "res/scripts/effects.gd",
-    "background": "res/scripts/world/background.gd",
+    "arena": "res/scripts/world/arena.gd",
+    "camera_rig": "res/scripts/world/camera_rig.gd",
     "post_fx": "res/scripts/post_fx.gd",
 }
 

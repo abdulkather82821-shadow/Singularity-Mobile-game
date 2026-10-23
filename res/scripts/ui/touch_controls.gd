@@ -60,7 +60,9 @@ func _compute_layout() -> void:
 		{"name": "shoot", "pos": Vector2(size.x - 244.0, size.y - 208.0), "r": 46.0, "label": "B", "color": Color(0.45, 0.86, 1.0)},
 		{"name": "dash", "pos": Vector2(size.x - 238.0, size.y - 80.0), "r": 40.0, "label": "D", "color": Color(1.0, 0.62, 0.88)},
 		{"name": "special", "pos": Vector2(size.x - 352.0, size.y - 138.0), "r": 44.0, "label": "S", "color": Color(1.0, 0.82, 0.48)},
-		{"name": "heal", "pos": Vector2(size.x - 140.0, size.y - 296.0), "r": 32.0, "label": "H", "color": Color(0.48, 1.0, 0.70)}
+		{"name": "heal", "pos": Vector2(size.x - 140.0, size.y - 296.0), "r": 32.0, "label": "H", "color": Color(0.48, 1.0, 0.70)},
+		{"name": "ult", "pos": Vector2(size.x - 372.0, size.y - 262.0), "r": 42.0, "label": "U", "color": Color(1.0, 0.76, 0.36)},
+		{"name": "class", "pos": Vector2(size.x - 62.0, size.y - 372.0), "r": 34.0, "label": "C", "color": Color(0.75, 0.55, 1.0)}
 	]
 
 

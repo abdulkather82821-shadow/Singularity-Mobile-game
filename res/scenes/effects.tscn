@@ -1,7 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://res/scripts/effects.gd" id="1_effects"]
+[ext_resource type="Script" path="res://res/scripts/effects.gd" id="1_script"]
 
-[node name="Effects" type="Node2D"]
-z_index = 900
-script = ExtResource("1_effects")
+[node name="Effects" type="Node3D"]
+script = ExtResource("1_script")
