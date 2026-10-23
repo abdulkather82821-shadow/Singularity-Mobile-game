@@ -46,6 +46,7 @@ var _title_clock: float = 0.0
 var _autoplay_clock: float = 0.0
 var _autoplay_logged: float = 0.0
 var _autoplay_started: int = 0
+var _upgrade_queued: bool = false
 var _autoplay_class_timer: float = 0.0
 
 @onready var arena: Arena3D = $Arena
@@ -408,7 +409,7 @@ func _after_dialogue(callback: Callable) -> void:
 
 # ------------------------------------------------------------------ story beats
 func _stage_cleared() -> void:
-	if state != "play":
+	if state != "play" and state != "clearing":
 		return
 	state = "story"
 	var result: Dictionary = run.complete_stage()
@@ -492,8 +493,9 @@ func _after_stage_crossroad() -> void:
 
 # ------------------------------------------------------------------ upgrades
 func _maybe_level_up() -> void:
-	if state == "play" and run.pending_levels > 0:
-		_open_upgrade()
+	if state == "play" and run.pending_levels > 0 and not _upgrade_queued:
+		_upgrade_queued = true
+		_open_upgrade.call_deferred()
 
 
 func _open_upgrade(next_action: Callable = Callable()) -> void:
@@ -644,6 +646,9 @@ func _tick_play(delta: float) -> void:
 	_resolve_collisions()
 	_cleanup()
 	_check_stage_progress()
+	if not is_instance_valid(player):
+		return
+	_upgrade_queued = false
 	hud.refresh(player, run, boss if is_instance_valid(boss) and boss.is_targetable() else null)
 	post_fx.set_low_health(player.hp / maxf(1.0, player.max_hp))
 	if stage_index == 1 and not awakening_shown and run.kills >= 5:
@@ -877,6 +882,8 @@ func _on_boss_summon(count: int) -> void:
 
 # ------------------------------------------------------------------ combat events
 func _on_player_melee(center: Vector3, facing: Vector3, radius_value: float, damage: float, heavy: bool, up: bool) -> void:
+	if not is_instance_valid(player):
+		return
 	var color: Color = player.class_data.get("color", GameConfig.COL_BLUE)
 	effects.slash(center, facing, color, radius_value, heavy, up)
 	AudioManager.play_sfx("swing")
@@ -923,6 +930,8 @@ func _hit_feedback(heavy: bool) -> void:
 
 
 func _on_player_shot(origin: Vector3, dir: Vector3, damage: float) -> void:
+	if not is_instance_valid(player):
+		return
 	var color: Color = player.class_data.get("color", GameConfig.COL_BLUE)
 	_spawn_projectile("player", origin, dir, damage, GameConfig.PROJECTILE_SPEED_3D, GameConfig.PROJECTILE_LIFE_3D, color, 0.2)
 	run.shots_fired += 1
@@ -931,11 +940,15 @@ func _on_player_shot(origin: Vector3, dir: Vector3, damage: float) -> void:
 
 
 func _on_ally_shot(origin: Vector3, dir: Vector3, damage: float) -> void:
+	if not is_instance_valid(player):
+		return
 	_spawn_projectile("ally", origin, dir, damage, GameConfig.ALLY_SHOT_SPEED * 0.04, 1.2, Color(1.0, 0.6, 0.85), 0.16)
 	AudioManager.play_sfx("orb")
 
 
 func _on_player_special(center: Vector3, radius_value: float, damage: float) -> void:
+	if not is_instance_valid(player):
+		return
 	var color: Color = player.class_data.get("color", GameConfig.COL_GOLD)
 	effects.ring(center, 0.6, radius_value * 1.6, color, 0.55, 3.0)
 	effects.burst(center + Vector3(0.0, 1.0, 0.0), color, 44, 9.5, 0.6, 0.13, 2.0)
@@ -946,6 +959,8 @@ func _on_player_special(center: Vector3, radius_value: float, damage: float) -> 
 
 
 func _on_player_ult(center: Vector3, radius_value: float, damage: float, ability_name: String, color: Color) -> void:
+	if not is_instance_valid(player):
+		return
 	effects.ring(center, 1.0, radius_value * 1.8, color, 1.0, 4.0)
 	effects.burst(center + Vector3(0.0, 1.2, 0.0), color, 70, 12.0, 1.1, 0.16, 1.5)
 	camera_rig.add_shake(1.2)
@@ -989,6 +1004,8 @@ func _run_aoe(center: Vector3, radius_value: float, damage: float, color: Color)
 
 
 func _on_player_mend(amount: float) -> void:
+	if not is_instance_valid(player):
+		return
 	effects.ring(player.position, 0.4, 2.8, GameConfig.COL_GREEN, 0.6, 2.0)
 	effects.burst(player.body_center(), GameConfig.COL_GREEN, 14, 2.4, 0.8, 0.09, -2.0)
 	effects.popup(player.body_center() + Vector3(0.0, 0.5, 0.0), "+%d" % int(amount), GameConfig.COL_GREEN, 52)
@@ -1008,6 +1025,8 @@ func _on_player_jump() -> void:
 
 
 func _on_player_dash(from_pos: Vector3, toward: Vector3) -> void:
+	if not is_instance_valid(player):
+		return
 	AudioManager.play_sfx("dash")
 	effects.ring(from_pos, 0.3, 1.6, Color(0.7, 0.9, 1.0), 0.35, 1.4)
 	effects.sparks(from_pos + Vector3(0.0, 1.0, 0.0), -toward, Color(0.75, 0.92, 1.0), 10, 4.0)
@@ -1221,7 +1240,8 @@ func _check_stage_progress() -> void:
 		var needed: int = int(stage_data.get("kills_needed", 0))
 		var duration: float = float(stage_data.get("duration", 60.0))
 		if run.kills >= needed or run.stage_time >= duration:
-			_stage_cleared()
+			state = "clearing"
+			_stage_cleared.call_deferred()
 
 
 func _clear_world() -> void:
