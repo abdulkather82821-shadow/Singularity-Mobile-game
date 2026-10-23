@@ -87,18 +87,29 @@ jobs:
 
       - name: Configure editor settings
         run: |
-          set -euo pipefail
-          JAVA=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
-          SDK="${ANDROID_HOME:-/usr/lib/android-sdk}"
-          mkdir -p "$HOME/.config/godot"
-          cat > "$HOME/.config/godot/editor_settings-4.3.tres" <<EOF
-          [gd_resource type="EditorSettings" format=3]
-
-          [resource]
-          export/android/java_sdk_path = "$JAVA"
-          export/android/android_sdk_path = "$SDK"
-          EOF
-          cat "$HOME/.config/godot/editor_settings-4.3.tres"
+          set +e
+          LOG="$RUNNER_TEMP/editor-settings.log"
+          {
+            set -x
+            JAVA=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+            SDK="${ANDROID_HOME:-/usr/lib/android-sdk}"
+            echo "JAVA=$JAVA SDK=$SDK HOME=$HOME"
+            ls "$JAVA/bin/javac" "$SDK/platforms" || true
+            mkdir -p "$HOME/.config/godot"
+            printf '%s\n' \
+              '[gd_resource type="EditorSettings" format=3]' \
+              '' \
+              '[resource]' \
+              "export/android/java_sdk_path = \"$JAVA\"" \
+              "export/android/android_sdk_path = \"$SDK\"" \
+              > "$HOME/.config/godot/editor_settings-4.3.tres"
+            echo "write_exit=$?"
+            mkdir -p /root/.config/godot
+            cp "$HOME/.config/godot/editor_settings-4.3.tres" /root/.config/godot/ 2>/dev/null
+            cat "$HOME/.config/godot/editor_settings-4.3.tres"
+          } > "$LOG" 2>&1
+          tail -c 1500 "$LOG" | tac | sed 's/%/%25/g' | head -n 8 | while IFS= read -r line; do echo "::error::$line"; done
+          test -s "$HOME/.config/godot/editor_settings-4.3.tres"
 
       - name: Debug keystore
         run: |
