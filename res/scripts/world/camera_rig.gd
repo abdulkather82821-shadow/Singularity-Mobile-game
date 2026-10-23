@@ -31,9 +31,9 @@ func _ready() -> void:
 	var hero := SpotLight3D.new()
 	hero.name = "HeroLight"
 	hero.light_color = Color(1.0, 0.93, 0.82)
-	hero.light_energy = 3.4
+	hero.light_energy = 2.2
 	hero.spot_range = 17.0
-	hero.spot_angle = 34.0
+	hero.spot_angle = 30.0
 	hero.spot_angle_attenuation = 0.6
 	hero.shadow_enabled = false
 	hero.position = Vector3(0.4, 4.2, 1.6)

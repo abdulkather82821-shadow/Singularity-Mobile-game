@@ -1482,18 +1482,6 @@ func _shot_mode(mode: String) -> void:
 			_spawn_enemy("grunt" if i < 2 else "stalker", Vector3(-3.4 + float(i) * 3.4, 0.0, -2.2 + float(i) * 1.2))
 		effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
 		effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.12, 2.4)
-		var ruler := MeshInstance3D.new()
-		var ruler_mesh := BoxMesh.new()
-		ruler_mesh.size = Vector3(0.55, 1.8, 0.55)
-		ruler.mesh = ruler_mesh
-		var ruler_mat := StandardMaterial3D.new()
-		ruler_mat.albedo_color = Color(1.0, 1.0, 1.0)
-		ruler_mat.emission_enabled = true
-		ruler_mat.emission = Color(1.0, 0.9, 0.4)
-		ruler_mat.emission_energy_multiplier = 0.6
-		ruler.material_override = ruler_mat
-		ruler.position = player.position + Vector3(2.2, 0.9, 0.0)
-		actors.add_child(ruler)
 		await get_tree().create_timer(2.0).timeout
 		var f2: Vector2 = camera_rig.camera.unproject_position(player.global_position)
 		var h2: Vector2 = camera_rig.camera.unproject_position(
