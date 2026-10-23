@@ -10,6 +10,7 @@ var camera: Camera3D
 var target: Node3D
 var look_height: float = GameConfig.CAMERA_LOOK_HEIGHT
 var follow_speed: float = 5.2
+var hero_light: SpotLight3D
 
 var _shake: float = 0.0
 var _orbit_time: float = 0.0
@@ -27,6 +28,18 @@ func _ready() -> void:
 	camera.far = 220.0
 	camera.position = offset
 	add_child(camera)
+	var hero := SpotLight3D.new()
+	hero.name = "HeroLight"
+	hero.light_color = Color(1.0, 0.93, 0.82)
+	hero.light_energy = 3.4
+	hero.spot_range = 17.0
+	hero.spot_angle = 34.0
+	hero.spot_angle_attenuation = 0.6
+	hero.shadow_enabled = false
+	hero.position = Vector3(0.4, 4.2, 1.6)
+	hero.rotation_degrees = Vector3(-72.0, 0.0, 0.0)
+	add_child(hero)
+	hero_light = hero
 	camera.look_at(global_position + Vector3(0.0, look_height, 0.0), Vector3.UP)
 	position = Vector3(0.0, 0.0, 0.0)
 

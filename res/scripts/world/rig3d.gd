@@ -42,7 +42,7 @@ func build(opts: Dictionary = {}) -> void:
 		"coat": Color(0.14, 0.16, 0.24),
 		"trim": Color(0.42, 0.62, 0.92),
 		"pants": Color(0.11, 0.12, 0.18),
-		"shirt": Color(0.92, 0.94, 1.0),
+		"shirt": Color(0.74, 0.8, 0.93),
 		"eye": Color(0.45, 0.85, 1.0),
 		"core": Color(0.42, 0.86, 1.0),
 		"cape": Color(0.12, 0.13, 0.22),
@@ -83,6 +83,10 @@ func _build_body() -> void:
 	part(torso, BoxMesh.new(), _mat(palette["coat"]), Vector3(0.0, 0.26, 0.0), Vector3.ZERO, Vector3(0.46, 0.54, 0.27))
 	part(torso, BoxMesh.new(), _mat(palette["shirt"]), Vector3(0.0, 0.28, 0.145), Vector3.ZERO, Vector3(0.2, 0.42, 0.03))
 	part(torso, BoxMesh.new(), _mat(palette["trim"]), Vector3(0.0, 0.44, 0.15), Vector3.ZERO, Vector3(0.34, 0.05, 0.03))
+	part(torso, BoxMesh.new(), _mat(palette["trim"]), Vector3(-0.26, 0.4, 0.0), Vector3(0.0, 0.0, -0.22), Vector3(0.16, 0.14, 0.26))
+	part(torso, BoxMesh.new(), _mat(palette["trim"]), Vector3(0.26, 0.4, 0.0), Vector3(0.0, 0.0, 0.22), Vector3(0.16, 0.14, 0.26))
+	part(torso, BoxMesh.new(), _mat(palette["coat"].darkened(0.25)), Vector3(0.0, 0.52, 0.0), Vector3.ZERO, Vector3(0.3, 0.12, 0.22))
+	part(torso, BoxMesh.new(), _mat(palette["coat"].darkened(0.35)), Vector3(0.0, -0.02, 0.0), Vector3.ZERO, Vector3(0.44, 0.06, 0.26))
 	core = part(torso, SphereMesh.new(), _mat(palette["core"], 2.6), Vector3(0.0, 0.24, 0.16), Vector3.ZERO, Vector3(0.09, 0.09, 0.06))
 	var skirt_mesh := CylinderMesh.new()
 	part(torso, skirt_mesh, _mat(palette["coat"]), Vector3(0.0, -0.16, 0.0), Vector3.ZERO, Vector3(0.46, 0.42, 0.34))
@@ -192,7 +196,7 @@ func _outline_material() -> StandardMaterial3D:
 	outline.albedo_color = OUTLINE_COLOR
 	outline.cull_mode = BaseMaterial3D.CULL_FRONT
 	outline.grow = true
-	outline.grow_amount = 0.026
+	outline.grow_amount = 0.032
 	return outline
 
 
@@ -203,8 +207,8 @@ func _mat(color: Color, emission: float = 0.0, roughness: float = 0.86) -> Stand
 	material.metallic = 0.0
 	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	material.rim_enabled = true
-	material.rim = 0.5
-	material.rim_tint = 0.35
+	material.rim = 0.68
+	material.rim_tint = 0.4
 	if emission > 0.0:
 		material.emission_enabled = true
 		material.emission = color

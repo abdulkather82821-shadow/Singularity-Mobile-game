@@ -185,10 +185,10 @@ func _bounds(half_x: float, half_z: float, color: Color) -> void:
 
 # ------------------------------------------------------------------ stage 1
 func _build_campus() -> void:
-	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.105, 0.1, 0.115), 0.96)
+	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.085, 0.082, 0.1), 0.96)
 	_grid_lines(Color(0.3, 0.32, 0.4), 4.0, 20.0, 13.0)
 	_bounds(20.0, 13.0, Color(0.22, 0.26, 0.34))
-	_apply_environment(Color(0.16, 0.2, 0.38), Color(0.95, 0.55, 0.38), Color(0.62, 0.66, 0.85), 0.012)
+	_apply_environment(Color(0.13, 0.17, 0.34), Color(0.82, 0.45, 0.3), Color(0.46, 0.5, 0.68), 0.011)
 	if is_instance_valid(sun):
 		sun.rotation_degrees = Vector3(-32.0, -38.0, 0.0)
 		sun.light_color = Color(1.0, 0.74, 0.52)
@@ -334,7 +334,7 @@ func _apply_environment(top: Color, horizon: Color, fog_color: Color, fog_densit
 	environment.background_energy_multiplier = 0.9
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.3, 0.34, 0.5).lerp(fog_color, 0.3)
-	environment.ambient_light_energy = 0.34
+	environment.ambient_light_energy = 0.3
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
 	environment.tonemap_exposure = 0.88
 	environment.tonemap_white = 6.0

@@ -76,7 +76,7 @@ func _rebuild_rig() -> void:
 		"hair": Color(0.09, 0.08, 0.13),
 		"coat": class_data.get("coat", Color(0.14, 0.16, 0.26)),
 		"trim": class_data.get("trim", Color(0.42, 0.62, 0.92)),
-		"shirt": Color(0.94, 0.96, 1.0),
+		"shirt": Color(0.78, 0.83, 0.96),
 		"pants": Color(0.12, 0.13, 0.2),
 		"eye": class_data.get("color", Color(0.42, 0.86, 1.0)),
 		"core": class_data.get("color", Color(0.42, 0.86, 1.0)),
