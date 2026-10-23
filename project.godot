@@ -108,6 +108,7 @@ pointing/emulate_touch_from_mouse=false
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=1
+textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_2d=1
 environment/defaults/default_clear_color=Color(0.012, 0.019, 0.047, 1)
 2d/snap/snap_2d_transforms_to_pixel=false
