@@ -141,7 +141,7 @@ jobs:
           godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk > "$LOG" 2>&1
           CODE=$?
           echo "export_exit=$CODE"
-          grep -vE "daemon at tcp:5037" "$LOG" | tail -n 40 | tac | head -n 24 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$line"; done
+          grep -vE "daemon at tcp:5037" "$LOG" | sed 's/%/%25/g' | awk '{ buf = buf $0 " ;; "; if (NR % 12 == 0) { print "::error::" buf; buf = "" } } END { if (buf != "") print "::error::" buf }' | head -n 10
           ls -l build/android/
           test $CODE -eq 0
           test -s build/android/SINGULARITY.apk
