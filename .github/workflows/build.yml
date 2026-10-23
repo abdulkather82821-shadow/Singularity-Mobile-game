@@ -61,39 +61,44 @@ jobs:
       - name: Import project
         run: godot --headless --path . --import || true
 
+      - name: Probe Android toolchain
+        run: |
+          echo "::warning::ANDROID_HOME=${ANDROID_HOME:-unset} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset} JAVA_HOME=${JAVA_HOME:-unset}"
+          echo "::warning::keytool=$(command -v keytool || echo missing) sdkmanager=$(command -v sdkmanager || echo missing)"
+          echo "::warning::sdk dirs: $(ls -d /root/android-sdk /opt/android-sdk /usr/lib/android-sdk /root/Android/Sdk 2>/dev/null | tr '\n' ' ')"
+
       - name: Debug keystore
         run: |
+          set -euo pipefail
           mkdir -p "$HOME/.android"
-          if [ ! -f "$HOME/.android/debug.keystore" ]; then
-            keytool -genkeypair -v \
-              -keystore "$HOME/.android/debug.keystore" \
+          KEYSTORE="$HOME/.android/debug.keystore"
+          if [ ! -f "$KEYSTORE" ]; then
+            if ! command -v keytool >/dev/null 2>&1; then
+              echo "::error::keytool not found in the container - no JDK for signing"
+              exit 1
+            fi
+            keytool -genkeypair -v -keystore "$KEYSTORE" \
               -storepass android -keypass android \
               -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
           fi
-          # Point the preset at the generated keystore (idempotent).
-          python3 - "$HOME/.android/debug.keystore" <<'PY'
-          import sys, pathlib
-          keystore = sys.argv[1]
-          preset = pathlib.Path("export_presets.cfg")
-          text = preset.read_text()
-          for key in ("keystore/debug", "keystore/release"):
-              if f'{key}=""' in text:
-                  text = text.replace(f'{key}=""', f'{key}="{keystore}"', 1)
-          for key in ("keystore/debug_user", "keystore/release_user"):
-              if f'{key}=""' in text:
-                  text = text.replace(f'{key}=""', f'{key}="androiddebugkey"', 1)
-          for key in ("keystore/debug_password", "keystore/release_password"):
-              if f'{key}=""' in text:
-                  text = text.replace(f'{key}=""', f'{key}="android"', 1)
-          preset.write_text(text)
-          PY
-          grep -E "keystore/" export_presets.cfg || true
+          sed -i "s|keystore/debug=\"\"|keystore/debug=\"$KEYSTORE\"|" export_presets.cfg
+          sed -i 's|keystore/debug_user=""|keystore/debug_user="androiddebugkey"|' export_presets.cfg
+          sed -i 's|keystore/debug_password=""|keystore/debug_password="android"|' export_presets.cfg
+          echo "::warning::preset: $(grep 'keystore/debug' export_presets.cfg | tr '\n' ' ')"
 
       - name: Export Android build
         run: |
           mkdir -p build/android
-          godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk
+          set +e
+          OUTPUT=$(godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk 2>&1)
+          CODE=$?
+          echo "$OUTPUT"
+          if [ $CODE -ne 0 ]; then
+            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail" | tail -n 6 | tr '\n' '|' | cut -c1-900)
+            echo "::error::APK export failed (exit $CODE): $MSG"
+            exit $CODE
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
