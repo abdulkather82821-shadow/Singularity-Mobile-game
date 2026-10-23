@@ -137,15 +137,14 @@ jobs:
         run: |
           mkdir -p build/android
           set +e
-          OUTPUT=$(godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk 2>&1)
+          LOG="$RUNNER_TEMP/apk-export.log"
+          godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk > "$LOG" 2>&1
           CODE=$?
-          echo "$OUTPUT"
-          if [ $CODE -ne 0 ]; then
-            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail|keystore|sdk" | tail -n 8 | tr '\n' '|' | cut -c1-1200)
-            echo "::error::APK export failed (exit $CODE): $MSG"
-            exit $CODE
-          fi
+          echo "export_exit=$CODE"
+          grep -vE "daemon at tcp:5037" "$LOG" | tail -n 40 | tac | head -n 24 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$line"; done
           ls -l build/android/
+          test $CODE -eq 0
+          test -s build/android/SINGULARITY.apk
 
       - uses: actions/upload-artifact@v4
         with:
