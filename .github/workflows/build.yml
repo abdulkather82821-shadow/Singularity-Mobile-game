@@ -263,6 +263,22 @@ jobs:
           test $CODE -eq 0
           test -s build/android/SINGULARITY.apk
 
+      - name: Verify the APK
+        run: |
+          APK=build/android/SINGULARITY.apk
+          ls -l "$APK"
+          echo "sha256=$(sha256sum "$APK" | cut -d' ' -f1)"
+          unzip -l "$APK" | head -n 12
+          SIGNER=""
+          for candidate in $(find / -maxdepth 6 -name apksigner -type f 2>/dev/null | head -n 3); do
+            SIGNER="$candidate"
+          done
+          if [ -n "$SIGNER" ]; then
+            "$SIGNER" verify --print-certs "$APK" | head -n 6
+          else
+            echo "::warning::apksigner not found in the image - skipped signature print"
+          fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: SINGULARITY-android

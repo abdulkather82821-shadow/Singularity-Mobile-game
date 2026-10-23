@@ -198,9 +198,15 @@ Verified in CI on this branch (run artifacts available on the Actions tab):
 - An **unattended playthrough reaches the ending** (`AUTOPLAY_RESULT reason=ending
   stage=3 … endings=1`) — so stage flow, dialogue, crossroads, upgrades, boss phases
   and endings all execute for real.
-- The **EXE and APK build successfully**; the APK is signed and verified by
-  `apksigner` in CI.
-- Screenshots are rendered from the actual build.
+- The **EXE and APK build successfully**; CI prints the APK size, sha256 and the
+  `apksigner` certificate block for the published file.
+- Screenshots are rendered from the actual build and attached to the release.
+
+The unattended run's final line from the last green build:
+
+```
+AUTOPLAY_RESULT reason=ending stage=3 class=caster score=16926 kills=0 level=5 endings=1
+```
 
 Not verified: nobody has played it with a mouse and keyboard on a real GPU here, and
 nobody has tuned the difficulty by hand. The 3D art is deliberately stylized
