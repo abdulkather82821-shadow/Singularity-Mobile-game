@@ -1,12 +1,16 @@
 # Builds the Windows executable and the Android APK on GitHub's runners.
 # Start it from the Actions tab ("Run workflow") or push to main / an arena branch.
-# Results are attached to the run as downloadable artifacts.
+# Both binaries are attached to the run as artifacts and to the rolling
+# "latest-build" release, so they always have a stable download URL.
 name: Build binaries
 
 on:
   workflow_dispatch:
   push:
     branches: [main, "arena/**"]
+
+permissions:
+  contents: write
 
 jobs:
   windows:
@@ -32,6 +36,7 @@ jobs:
         run: |
           mkdir -p build/windows
           godot --headless --path . --export-release "Windows Desktop" build/windows/SINGULARITY.exe
+          ls -l build/windows/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -58,31 +63,46 @@ jobs:
       - name: Import project
         run: godot --headless --path . --import || true
 
-      - name: Probe Android toolchain
+      - name: Android toolchain
         run: |
-          echo "::warning::ANDROID_HOME=${ANDROID_HOME:-unset} JAVA_HOME=${JAVA_HOME:-unset}"
-          if command -v java >/dev/null 2>&1; then
-            DETECTED=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
-            echo "JAVA_HOME=$DETECTED" >> "$GITHUB_ENV"
-            echo "::warning::java found at $DETECTED"
-          else
-            echo "::warning::no java on PATH"
-          fi
-          echo "::warning::keytool=$(command -v keytool || echo missing)"
-          echo "::warning::sdk platforms: $(ls /usr/lib/android-sdk/platforms 2>/dev/null | tr '\n' ' ')"
-          echo "::warning::sdk build-tools: $(ls /usr/lib/android-sdk/build-tools 2>/dev/null | tr '\n' ' ')"
+          set +e
+          LOG="$RUNNER_TEMP/android-toolchain.log"
+          {
+            set -x
+            if command -v java >/dev/null 2>&1; then
+              DETECTED=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+              echo "JAVA_HOME=$DETECTED" >> "$GITHUB_ENV"
+            fi
+            echo "ANDROID_HOME=${ANDROID_HOME:-} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-}"
+            ls /usr/lib/android-sdk
+            SDKM=$(command -v sdkmanager)
+            echo "sdkmanager=$SDKM"
+            yes | "$SDKM" --licenses
+            "$SDKM" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+            echo "install_exit=$?"
+            ls /usr/lib/android-sdk/platforms /usr/lib/android-sdk/build-tools
+          } > "$LOG" 2>&1
+          tail -c 2000 "$LOG" | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$line"; done
+          exit 0
 
       - name: Debug keystore
         run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.android"
-          KEYSTORE="$HOME/.android/debug.keystore"
-          if [ ! -f "$KEYSTORE" ]; then
+          set +e
+          LOG="$RUNNER_TEMP/keystore.log"
+          {
+            set -x
+            mkdir -p "$HOME/.android"
+            KEYSTORE="$HOME/.android/debug.keystore"
+            rm -f "$KEYSTORE"
             keytool -genkeypair -keystore "$KEYSTORE" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          fi
-          ls -l "$KEYSTORE"
-          python3 tools/ci_patch_android_preset.py "$KEYSTORE"
-          grep -E "^keystore/" export_presets.cfg
+            echo "keytool_exit=$?"
+            ls -l "$KEYSTORE"
+            python3 tools/ci_patch_android_preset.py "$KEYSTORE"
+            echo "patch_exit=$?"
+            grep -E "^keystore/" export_presets.cfg
+          } > "$LOG" 2>&1
+          tail -c 2500 "$LOG" | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$line"; done
+          grep -q '^keystore/debug="/' export_presets.cfg
 
       - name: Export Android build
         run: |
@@ -92,13 +112,42 @@ jobs:
           CODE=$?
           echo "$OUTPUT"
           if [ $CODE -ne 0 ]; then
-            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail|keystore|sdk" | tail -n 6 | tr '\n' '|' | cut -c1-900)
+            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail|keystore|sdk" | tail -n 8 | tr '\n' '|' | cut -c1-1200)
             echo "::error::APK export failed (exit $CODE): $MSG"
             exit $CODE
           fi
+          ls -l build/android/
 
       - uses: actions/upload-artifact@v4
         with:
           name: SINGULARITY-android
           path: build/android/SINGULARITY.apk
           if-no-files-found: error
+
+  publish:
+    name: Publish download links
+    needs: [windows, android]
+    if: always() && (needs.windows.result == 'success' || needs.android.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Show what was built
+        run: find dist -type f -printf '%p %s bytes\n' | sort
+
+      - name: Update rolling release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-build
+          name: Latest automated build
+          body: |
+            Binaries produced by the "Build binaries" workflow from `${{ github.ref_name }}` at ${{ github.sha }}.
+            Windows: unzip `SINGULARITY-windows.zip` and run `SINGULARITY.exe`.
+            Android: install `SINGULARITY.apk` (debug-signed; allow "install from unknown sources").
+          files: dist/**/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
