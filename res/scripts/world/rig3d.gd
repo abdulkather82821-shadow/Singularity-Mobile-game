@@ -22,6 +22,7 @@ var weapon: Node3D
 var core: MeshInstance3D
 var hair: Node3D
 var height: float = 1.8
+var coat_tails: Array[MeshInstance3D] = []
 
 var _time: float = 0.0
 var _walk: float = 0.0
@@ -104,6 +105,16 @@ func _build_body() -> void:
 	hair = Node3D.new()
 	head.add_child(hair)
 	_build_hair()
+
+	var tail_material: StandardMaterial3D = _mat(palette["coat"].darkened(0.15))
+	var coat_l: MeshInstance3D = part(torso, BoxMesh.new(), tail_material,
+		Vector3(-0.14, -0.36, -0.02), Vector3(0.12, 0.0, 0.06), Vector3(0.2, 0.46, 0.24))
+	var coat_r: MeshInstance3D = part(torso, BoxMesh.new(), tail_material,
+		Vector3(0.14, -0.36, -0.02), Vector3(0.12, 0.0, -0.06), Vector3(0.2, 0.46, 0.24))
+	coat_l.name = "CoatTailL"
+	coat_r.name = "CoatTailR"
+	coat_tails.append(coat_l)
+	coat_tails.append(coat_r)
 
 	if bool(palette["cape_on"]):
 		cape = Node3D.new()
@@ -271,6 +282,11 @@ func animate(delta: float, mode: String, speed_ratio: float = 0.0) -> void:
 		_walk = lerp_angle(_walk, 0.0, clampf(delta * 7.0, 0.0, 1.0))
 	var bob: float = 0.0
 	var swing: float = sin(_walk)
+	for index in coat_tails.size():
+		var tail: MeshInstance3D = coat_tails[index]
+		var side: float = -1.0 if index == 0 else 1.0
+		tail.rotation.x = 0.12 + speed_ratio * 0.42 + sin(_walk * 0.9 + side) * 0.06
+		tail.rotation.z = side * (0.04 + speed_ratio * 0.05)
 	if mode == "run" or speed_ratio > 0.05:
 		leg_l.rotation.x = swing * 0.78
 		leg_r.rotation.x = -swing * 0.78

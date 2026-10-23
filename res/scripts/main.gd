@@ -1462,9 +1462,13 @@ func _shot_mode(mode: String) -> void:
 	player.facing = Vector3(0.0, 0.0, -1.0)
 	camera_rig.set_target(player)
 	camera_rig.snap_to_target()
-	print("SHOT player=%s rig_children=%d cam=%s" % [
-		str(player.global_position), player.rig.get_child_count(),
-		str(camera_rig.camera.global_position)
+	var feet: Vector2 = camera_rig.camera.unproject_position(player.global_position)
+	var head: Vector2 = camera_rig.camera.unproject_position(
+		player.global_position + Vector3(0.0, player.rig.height, 0.0))
+	print("SHOT player=%s rig_children=%d rig_h=%.2f cam=%s fov=%.1f feet=%s head=%s px=%.0f" % [
+		str(player.global_position), player.rig.get_child_count(), player.rig.height,
+		str(camera_rig.camera.global_position), camera_rig.camera.fov,
+		str(feet), str(head), absf(feet.y - head.y)
 	])
 	if mode == "boss":
 		boss_timer = -1.0
