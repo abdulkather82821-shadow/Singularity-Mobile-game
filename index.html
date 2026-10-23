@@ -584,6 +584,100 @@
     }
   }
 
+
+  /* ============================= XP / LEVEL ============================= */
+  .xpbar{
+    height:4px; border-radius:3px; overflow:hidden; margin-top:3px;
+    background:rgba(4,8,20,.85); border:1px solid rgba(140,170,255,.18);
+  }
+  .xpbar > i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,#7dffb0,#45dcff); transition:width .3s ease; }
+  .level-chip{
+    font-size:.5rem; letter-spacing:.18em; color:#a8ffe0; font-weight:800;
+    border:1px solid rgba(120,255,190,.3); border-radius:5px; padding:3px 7px;
+    background:rgba(10,40,30,.55); white-space:nowrap;
+  }
+
+  /* ============================= CHOICES ============================= */
+  #choices{
+    position:absolute; inset:0; z-index:41; pointer-events:none;
+    display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
+    padding:0 14px calc(88px + env(safe-area-inset-bottom));
+  }
+  body.touch-on #choices{ padding-bottom:calc(196px + env(safe-area-inset-bottom)); }
+  .choice-wrap{
+    pointer-events:auto; width:min(760px, 100%);
+    border:1px solid rgba(150,130,255,.45); border-radius:12px;
+    background:linear-gradient(160deg, rgba(18,22,50,.97), rgba(7,10,24,.98));
+    box-shadow:0 20px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08), 0 0 34px rgba(110,70,220,.22);
+    padding:10px 12px 12px;
+    animation:dlgIn .28s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  .choice-head{
+    font-size:.5rem; letter-spacing:.3em; color:#9fb4ff; text-transform:uppercase;
+    margin-bottom:7px; display:flex; justify-content:space-between; gap:10px;
+  }
+  .choice-head .hint{ color:#6f7aa6; letter-spacing:.14em; }
+  .choice-list{ display:flex; flex-direction:column; gap:6px; }
+  .choice-btn{
+    display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
+    border:1px solid rgba(140,160,240,.26); background:rgba(12,17,38,.82);
+    border-radius:8px; padding:9px 12px; cursor:pointer; color:#dfe6ff;
+    transition:border-color .15s, background .15s, box-shadow .15s, transform .12s;
+  }
+  .choice-btn .ck{
+    flex:0 0 auto; width:20px; height:20px; border-radius:5px; display:grid; place-items:center;
+    font-size:.58rem; font-weight:800; color:#9fe0ff; background:rgba(90,140,255,.16);
+    border:1px solid rgba(120,180,255,.4); margin-top:1px;
+  }
+  .choice-btn .ctxt{ display:block; font-size:.78rem; font-weight:700; letter-spacing:.03em; }
+  .choice-btn .cn{ display:block; font-size:.62rem; color:#93a0ca; font-weight:400; margin-top:2px; line-height:1.4; }
+  .choice-btn:hover, .choice-btn.sel{
+    border-color:rgba(150,220,255,.7);
+    background:linear-gradient(100deg, rgba(40,62,132,.92), rgba(14,20,44,.92));
+    box-shadow:0 0 20px rgba(80,140,255,.28); transform:translateX(2px);
+  }
+  body.touch-on .choice-btn{ padding:12px; }
+
+  /* ============================= UPGRADES ============================= */
+  .upgrade-list{ display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:10px; margin-top:14px; }
+  .up-card{
+    text-align:left; border:1px solid var(--line); border-radius:12px; cursor:pointer;
+    background:linear-gradient(160deg, rgba(22,28,58,.95), rgba(8,11,26,.96));
+    padding:14px 14px 12px; color:var(--text);
+    transition:transform .15s ease, border-color .2s, box-shadow .2s, background .2s;
+    position:relative; overflow:hidden;
+  }
+  .up-card::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--upc, var(--purple)); opacity:.8; }
+  .up-card:hover, .up-card:focus-visible{
+    transform:translateY(-3px); border-color:rgba(160,190,255,.7);
+    box-shadow:0 16px 36px rgba(60,80,200,.32); outline:none;
+  }
+  .up-icon{ font-size:1.45rem; line-height:1; filter:drop-shadow(0 0 10px var(--upc, #a45cff)); }
+  .up-name{ font-size:.74rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; margin-top:8px; }
+  .up-desc{ font-size:.68rem; color:#a3afd6; margin-top:5px; line-height:1.5; }
+  .up-rank{ font-size:.5rem; letter-spacing:.18em; color:#7d89b4; text-transform:uppercase; margin-top:9px; }
+  .up-rank b{ color:#c9d6ff; }
+
+  /* ============================= ENDING CARD ============================= */
+  .ending-card{
+    width:100%; border:1px solid rgba(255,190,100,.35); border-radius:12px; text-align:center;
+    background:linear-gradient(150deg, rgba(64,42,14,.4), rgba(10,12,28,.88));
+    padding:14px 16px; margin-top:12px; box-shadow:0 0 36px rgba(255,170,70,.12), inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  .ending-card .ec-sub{ font-size:.52rem; letter-spacing:.3em; text-transform:uppercase; color:#ffd79a; }
+  .ending-card .ec-title{
+    font-size:clamp(1.05rem, 3.6vw, 1.6rem); font-weight:900; letter-spacing:.12em; margin-top:6px;
+    background:linear-gradient(180deg,#fff,#ffd79a 60%,#ffab5c);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 16px rgba(255,180,80,.4));
+  }
+  .ending-card .ec-text{ font-size:.76rem; color:#cfc7e0; line-height:1.65; margin-top:8px; }
+  .ending-card .ec-meta{ font-size:.55rem; letter-spacing:.16em; text-transform:uppercase; color:#8f9ac2; margin-top:10px; }
+
+  /* heal ability accent */
+  .ability.heal.ready{ border-color:rgba(125,255,176,.65); box-shadow:0 0 16px rgba(90,255,160,.3); color:#dcffec; }
+  .tbtn.heal{ border-color:rgba(125,255,176,.45); color:#c9ffdf; }
+
   /* ============================= RESPONSIVE ============================= */
   @media (max-width: 760px){
     .hud-left{ max-width:52vw; }
@@ -592,6 +686,7 @@
     .toast{ top:calc(var(--band-top, 0px) + 112px); }
   }
   @media (max-height: 620px){
+    #choices{ padding-bottom:calc(170px + env(safe-area-inset-bottom)); }
     .game-logo{ font-size:clamp(2rem, 7vw, 3.2rem); }
     .title-tag{ display:none; }
     .menu{ gap:6px; }
@@ -641,6 +736,11 @@
           <i id="en-fill"></i>
           <span class="bar-label" id="en-label">100</span>
         </div>
+        <div class="xpbar" aria-label="Experience"><i id="xp-fill"></i></div>
+        <div class="hud-id" style="margin-top:2px;">
+          <span class="level-chip" id="hud-level">VESSEL LV.1</span>
+          <span class="level-chip" id="hud-xp" style="border-color:rgba(140,170,255,.18);color:#94a2cd;background:rgba(14,20,44,.5)">XP 0 / 100</span>
+        </div>
       </div>
       <div class="hud-right">
         <div class="stage-chip" id="hud-stage">STAGE 1 · <b>THE AWAKENING</b></div>
@@ -670,6 +770,7 @@
       <div class="ability" id="ab-atk" data-ability="atk"><span>J</span><span class="key">ATK</span><div class="fill"></div></div>
       <div class="ability" id="ab-en" data-ability="en"><span>K</span><span class="key">NRG</span><div class="fill"></div></div>
       <div class="ability sp" id="ab-sp" data-ability="sp"><span>L</span><span class="key">SPC</span><div class="fill"></div></div>
+      <div class="ability heal" id="ab-heal" data-ability="heal"><span>H</span><span class="key">MEND</span><div class="fill"></div></div>
       <div class="ability" id="ab-dash" data-ability="dash"><span>⇧</span><span class="key">DASH</span><div class="fill"></div></div>
     </div>
   </div>
@@ -698,6 +799,7 @@
       <button class="tbtn small jump" id="tb-jump" type="button" aria-label="Jump"><span class="ti">▲</span>JUMP</button>
       <button class="tbtn dash" id="tb-dash" type="button" aria-label="Dash"><span class="ti">»</span>DASH</button>
       <button class="tbtn small en" id="tb-energy" type="button" aria-label="Energy shot"><span class="ti">✦</span>SHOT</button>
+      <button class="tbtn small heal" id="tb-heal" type="button" aria-label="Mend"><span class="ti">✚</span>MEND</button>
       <button class="tbtn sp" id="tb-special" type="button" aria-label="Special ability"><span class="ti">✹</span>SPECIAL</button>
       <button class="tbtn atk" id="tb-attack" type="button" aria-label="Melee attack"><span class="ti">⚔</span>STRIKE</button>
     </div>
@@ -714,6 +816,30 @@
           <span class="dlg-hint"><span class="k">ENTER / SPACE</span> or tap to continue</span>
           <button class="dlg-next" id="dlg-next" type="button">CONTINUE</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== CHOICES ============================== -->
+  <div id="choices" class="hidden" role="dialog" aria-modal="true" aria-label="Choose a skillset">
+    <div class="choice-wrap">
+      <div class="choice-head">
+        <span id="choice-head-text">CHOOSE YOUR PATH</span>
+        <span class="hint"><span id="choice-hint">1 / 2 / 3 or tap</span></span>
+      </div>
+      <div class="choice-list" id="choice-list"></div>
+    </div>
+  </div>
+
+  <!-- ============================== LEVEL UP / SKILLS ============================== -->
+  <div id="screen-upgrade" class="screen solid hidden">
+    <div class="screen-inner">
+      <div class="panel" style="max-width:640px">
+        <div class="eyebrow" id="up-eyebrow">VESSEL GROWTH</div>
+        <h2 style="text-align:center" id="up-title">LEVEL UP</h2>
+        <p style="text-align:center" id="up-sub">Choose one upgrade. The rift does not wait.</p>
+        <div class="upgrade-list" id="upgrade-list"></div>
+        <p class="note" style="text-align:center;margin-top:14px">Upgrades persist for the rest of this run. Press <span class="kbd-hint">1</span>–<span class="kbd-hint">3</span> or tap a card.</p>
       </div>
     </div>
   </div>
@@ -787,6 +913,7 @@
           <div class="control-row"><span class="keys"><kbd>J</kbd></span> Melee strike</div>
           <div class="control-row"><span class="keys"><kbd>K</kbd></span> Energy shot</div>
           <div class="control-row"><span class="keys"><kbd>L</kbd></span> Awakened burst (special)</div>
+          <div class="control-row"><span class="keys"><kbd>H</kbd></span> Mend (restore health)</div>
           <div class="control-row"><span class="keys"><kbd>Shift</kbd></span> Dash (brief invulnerability)</div>
           <div class="control-row"><span class="keys"><kbd>Esc</kbd></span> Pause / resume</div>
         </div>
@@ -803,6 +930,13 @@
           <li><b>Dash</b> grants brief invulnerability and passes through danger. Watch its cooldown.</li>
           <li>Taking damage breaks your combo. Chaining hits raises your score multiplier up to <b>x4</b>.</li>
           <li>Purple ground rings are telegraphed rift eruptions — leave the ring before it detonates.</li>
+        </ul>
+        <h3>Progression &amp; Choices</h3>
+        <ul class="tip-list">
+          <li><b>Level up</b> by felling wraiths and gathering rift energy. Each level lets you pick a permanent upgrade (power, energy, healing, dash, vitality, awakened core).</li>
+          <li><b>Mend (H / MEND)</b> spends energy to restore health — unlocked by choosing the <i>Vessel Mend</i> path at the first crossroads.</li>
+          <li><b>Choices matter.</b> Story crossroads change your skills and the ending you reach. Between stages you may stand with your allies or walk the rift alone.</li>
+          <li>Your path is recorded on the victory screen — replay to see the other endings.</li>
         </ul>
         <div class="callout">Survive the campus, hold the rift, and reach Katleen with enough health to finish the fight. Progress and best scores are saved on this device when storage is available.</div>
         <div class="screen-actions"><button class="btn primary" data-close="howto" type="button">Understood</button></div>
@@ -861,6 +995,7 @@
           <div class="stat"><span class="sk">Wraiths felled</span><span class="sv" id="hs-kills">0</span></div>
           <div class="stat"><span class="sk">Runs completed</span><span class="sv" id="hs-victories">0</span></div>
           <div class="stat"><span class="sk">Saved checkpoint</span><span class="sv" id="hs-progress">None</span></div>
+          <div class="stat"><span class="sk">Endings found</span><span class="sv" id="hs-endings">0 / 3</span></div>
         </div>
         <p class="note" id="hs-note">Best scores are stored locally in your browser.</p>
         <div class="screen-actions">
@@ -935,6 +1070,12 @@
       <p class="quote-card">“You were never a vessel for the end. You were the beginning.”</p>
       <div class="stat-grid" id="vic-stats" style="max-width:680px"></div>
       <div id="vic-best"></div>
+      <div class="ending-card" id="vic-ending">
+        <div class="ec-sub">ENDING</div>
+        <div class="ec-title" id="ending-title">THE VESSEL'S CHOICE</div>
+        <div class="ec-text" id="ending-text"></div>
+        <div class="ec-meta" id="ending-meta"></div>
+      </div>
       <div class="badge-row" id="vic-badges"></div>
       <div class="screen-actions">
         <button class="btn primary" id="btn-vic-again" type="button">Play Again</button>
@@ -1027,16 +1168,16 @@
       types: {
         grunt: {
           hp: 34, speed: 104, damage: 8, radius: 23, contactCd: 1.1,
-          score: 120, energyDrop: 0.55, coreDrop: 0.05, height: 74
+          score: 120, energyDrop: 0.55, coreDrop: 0.05, height: 74, xp: 14
         },
         stalker: {
           hp: 28, speed: 164, damage: 10, radius: 21, contactCd: 1.0,
-          score: 175, energyDrop: 0.6, coreDrop: 0.06, height: 78,
+          score: 175, energyDrop: 0.6, coreDrop: 0.06, height: 78, xp: 19,
           shootCd: 2.5, shootDamage: 9, preferRange: 250
         },
         brute: {
           hp: 105, speed: 62, damage: 17, radius: 33, contactCd: 1.35,
-          score: 330, energyDrop: 0.8, coreDrop: 0.16, height: 112
+          score: 330, energyDrop: 0.8, coreDrop: 0.16, height: 112, xp: 38
         }
       }
     },
@@ -1100,6 +1241,25 @@
         objective: 'Defeat Katleen. End the invasion.',
         difficulty: { hp: 1, speed: 1, damage: 1 }
       }
+    },
+    xp: {
+      base: 60,
+      growth: 46,
+      maxLevel: 9,
+      orbXp: 7,
+      stageBonus: 60,
+      bossBonus: 160
+    },
+    heal: {
+      cost: 26,
+      cooldown: 6.5,
+      amount: 22
+    },
+    ally: {
+      cooldown: 2.4,
+      damage: 11,
+      shotSpeed: 640,
+      offset: 0.085
     },
     combo: {
       window: 2.6,
@@ -1178,7 +1338,7 @@
   const DEFAULT_SETTINGS = { sfx: true, music: true, shake: true, reducedFx: false, touch: true };
   const Save = {
     data: {
-      best: 0, bestCombo: 1, stagesCleared: 0, kills: 0, victories: 0,
+      best: 0, bestCombo: 1, stagesCleared: 0, kills: 0, victories: 0, endings: {},
       settings: Object.assign({}, DEFAULT_SETTINGS), checkpoint: null
     },
     available: true,
@@ -1202,6 +1362,12 @@
       this.data.stagesCleared = Math.min(3, num(parsed.stagesCleared, 0));
       this.data.kills = num(parsed.kills, 0);
       this.data.victories = num(parsed.victories, 0);
+      const en = parsed.endings && typeof parsed.endings === 'object' ? parsed.endings : {};
+      this.data.endings = {
+        seal: en.seal === true,
+        sovereign: en.sovereign === true,
+        dawn: en.dawn === true
+      };
       const s = parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : {};
       this.data.settings = {
         sfx: typeof s.sfx === 'boolean' ? s.sfx : DEFAULT_SETTINGS.sfx,
@@ -1263,6 +1429,7 @@
       this.data.stagesCleared = 0;
       this.data.kills = 0;
       this.data.victories = 0;
+      this.data.endings = {};
       this.data.checkpoint = null;
       this.persist();
     }
@@ -1522,7 +1689,7 @@
 
   /* ============================ 5. INPUT ============================ */
   const held = { left: false, right: false, up: false, down: false, attack: false, energy: false };
-  const pressed = { jump: false, attack: false, energy: false, special: false, dash: false };
+  const pressed = { jump: false, attack: false, energy: false, special: false, dash: false, heal: false };
   const joy = { active: false, x: 0, y: 0, pointerId: null };
   let audioUnlocked = false;
 
@@ -1532,7 +1699,7 @@
   }
 
   function clearPressed() {
-    pressed.jump = pressed.attack = pressed.energy = pressed.special = pressed.dash = false;
+    pressed.jump = pressed.attack = pressed.energy = pressed.special = pressed.dash = pressed.heal = false;
   }
   function clearHeld() {
     held.left = held.right = held.up = held.down = held.attack = held.energy = false;
@@ -1543,7 +1710,7 @@
   const PREVENT_KEYS = {
     ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1, Space: 1,
     KeyW: 1, KeyA: 1, KeyS: 1, KeyD: 1, KeyJ: 1, KeyK: 1, KeyL: 1,
-    ShiftLeft: 1, ShiftRight: 1, Escape: 1, Enter: 1
+    ShiftLeft: 1, ShiftRight: 1, Escape: 1, Enter: 1, KeyH: 1, Digit1: 1, Digit2: 1, Digit3: 1
   };
 
   function handleKeyDown(e) {
@@ -1562,6 +1729,13 @@
       case 'KeyJ': held.attack = true; pressed.attack = true; break;
       case 'KeyK': held.energy = true; pressed.energy = true; break;
       case 'KeyL': pressed.special = true; break;
+      case 'KeyH': pressed.heal = true; break;
+      case 'Digit1': case 'Digit2': case 'Digit3': {
+        const digit = code === 'Digit1' ? 0 : (code === 'Digit2' ? 1 : 2);
+        if (Game.state === 'UPGRADE') { handleUpgradeKey(digit); return; }
+        if (Game.state === 'CHOICE') { pickChoice(digit); return; }
+        return;
+      }
       case 'ShiftLeft': case 'ShiftRight': pressed.dash = true; break;
       case 'Space': onSpacePressed(); break;
       case 'Enter': onEnterPressed(); break;
@@ -1603,6 +1777,7 @@
 
   function onEscapePressed() {
     AudioSys.resume();
+    if (Game.state === 'UPGRADE' || Game.state === 'CHOICE') return;
     const overlay = visibleOverlay();
     if (overlay) { closeOverlay(overlay); return; }
     if (Game.state === 'PLAYING') { pauseGame(); return; }
@@ -1682,6 +1857,9 @@
     });
     bindTouchButton('tb-jump', {
       down() { pressed.jump = true; }
+    });
+    bindTouchButton('tb-heal', {
+      down() { pressed.heal = true; }
     });
   }
 
@@ -1770,6 +1948,7 @@
     overlayFromPause: false,
     deathHandled: false,
     skipIntroOnce: false,
+    classroomScene: false,
     damageSources: {}
   };
 
@@ -1796,8 +1975,247 @@
     walkPhase: 0, moving: false, speedNow: 0,
     dead: false, deathT: 0, awake: false,
     jumpBuffered: 0, landT: 0, hurtT: 0,
-    comboStepTimer: 0
+    comboStepTimer: 0,
+    healCd: 0
   };
+
+  /* ---------- 8a. PROGRESSION: XP, LEVELS, SKILLS ---------- */
+  const run = {
+    level: 1,
+    xp: 0,
+    xpNext: CONFIG.xp.base,
+    pendingLevels: 0,
+    upgrades: {},
+    path: null,        // 'scholar' | 'guardian'
+    allies: false,     // stood with the others at the rift
+    resolve: null,     // 'faith' | 'power'
+    ending: null,      // 'seal' | 'sovereign' | 'dawn'
+    choiceLog: [],
+    modifiers: {
+      dmg: 1, energyRegen: 1, special: 1, dash: 1,
+      maxHp: 0, energyMax: 0, healAmount: CONFIG.heal.amount,
+      heal: false, shotCostMult: 1, xpMult: 1
+    }
+  };
+
+  const UPGRADES = [
+    {
+      id: 'power', name: 'Rift Edge', icon: '⚔', color: '#8fe6ff', max: 5,
+      desc: 'Melee and energy shots deal +12% damage.',
+      apply: function (m) { m.dmg += 0.12; }
+    },
+    {
+      id: 'current', name: 'Vessel Current', icon: '✦', color: '#45dcff', max: 4,
+      desc: 'Energy regenerates 25% faster.',
+      apply: function (m) { m.energyRegen += 0.25; }
+    },
+    {
+      id: 'mend', name: 'Vessel Mend', icon: '✚', color: '#7dffb0', max: 3,
+      desc: 'Unlock Mend (H) and heal +14 more health.',
+      apply: function (m) { m.heal = true; m.healAmount += 14; }
+    },
+    {
+      id: 'step', name: 'Phase Step', icon: '»', color: '#ff9ad9', max: 3,
+      desc: 'Dash cools down 18% faster with longer invulnerability.',
+      apply: function (m) { m.dash += 0.22; }
+    },
+    {
+      id: 'vitality', name: 'Second Heart', icon: '❤', color: '#ff7b93', max: 4,
+      desc: '+20 maximum health, granted immediately.',
+      apply: function (m) { m.maxHp += 20; }
+    },
+    {
+      id: 'burst', name: 'Singularity Core', icon: '✹', color: '#ffce6a', max: 4,
+      desc: 'Special burst hits +22% harder with a wider radius.',
+      apply: function (m) { m.special += 0.22; }
+    },
+    {
+      id: 'flux', name: 'Rift Flux', icon: '∞', color: '#c45cff', max: 3,
+      desc: '+25 maximum energy and 12% cheaper shots.',
+      apply: function (m) {
+        m.energyMax += 25;
+        m.shotCostMult = Math.max(0.5, m.shotCostMult - 0.12);
+      }
+    }
+  ];
+
+  function upgradeRank(id) { return run.upgrades[id] || 0; }
+
+  function recomputeModifiers() {
+    const m = run.modifiers;
+    m.dmg = 1; m.energyRegen = 1; m.special = 1; m.dash = 1;
+    m.maxHp = 0; m.energyMax = 0; m.healAmount = CONFIG.heal.amount;
+    m.heal = false; m.shotCostMult = 1; m.xpMult = 1;
+    if (run.path === 'scholar') m.special += 0.25;
+    if (run.path === 'guardian') { m.heal = true; m.maxHp += 15; }
+    if (run.allies) m.maxHp += 20;
+    if (run.choiceLog.indexOf('alone') !== -1) m.dmg += 0.18;
+    if (run.resolve === 'faith') { m.heal = true; m.healAmount += 8; m.dmg += 0.06; }
+    if (run.resolve === 'power') m.dmg += 0.22;
+    for (let i = 0; i < UPGRADES.length; i++) {
+      const u = UPGRADES[i];
+      const rank = upgradeRank(u.id);
+      for (let k = 0; k < rank; k++) u.apply(m);
+    }
+    player.maxHp = CONFIG.player.maxHp + m.maxHp;
+    player.maxEnergy = CONFIG.player.maxEnergy + m.energyMax;
+    if (player.hp > player.maxHp) player.hp = player.maxHp;
+    if (player.energy > player.maxEnergy) player.energy = player.maxEnergy;
+  }
+
+  function resetProgression() {
+    run.level = 1;
+    run.xp = 0;
+    run.xpNext = CONFIG.xp.base;
+    run.pendingLevels = 0;
+    run.upgrades = {};
+    run.path = null;
+    run.allies = false;
+    run.resolve = null;
+    run.ending = null;
+    run.choiceLog.length = 0;
+    recomputeModifiers();
+  }
+
+  function gainXp(amount) {
+    if (amount <= 0) return;
+    if (Game.state === 'GAME_OVER' || Game.state === 'VICTORY') return;
+    if (run.level >= CONFIG.xp.maxLevel) return;
+    run.xp += amount * run.modifiers.xpMult;
+    let guard = 0;
+    while (run.xp >= run.xpNext && run.level < CONFIG.xp.maxLevel && guard++ < 20) {
+      run.xp -= run.xpNext;
+      run.level++;
+      run.xpNext = Math.round(CONFIG.xp.base + run.level * CONFIG.xp.growth);
+      run.pendingLevels++;
+      addFloater(player.x, player.y - 118 * depthScale(player.y), 'LEVEL ' + run.level, '#8affe0', 18);
+      addRing(player.x, player.y, 130, 0.7, '#7dffb0', 4);
+      burst(player.x, player.y - 40, 22, ['#7dffb0', '#8fe6ff', '#ffffff'], 260, { size: 2.8, gravity: -40, life: 0.9 });
+      AudioSys.sfx('core');
+    }
+    if (run.level >= CONFIG.xp.maxLevel) run.xp = 0;
+    if (run.pendingLevels > 0) tryOpenUpgrade();
+  }
+
+  /* ---------- 8b. HEALING ---------- */
+  function doHeal() {
+    if (player.dead || Game.state !== 'PLAYING') return;
+    const m = run.modifiers;
+    if (!m.heal) {
+      showToast('MEND LOCKED', 'Take the guardian path or the Vessel Mend upgrade.', 2.2);
+      AudioSys.sfx('ui');
+      return;
+    }
+    if (player.healCd > 0 || player.energy < CONFIG.heal.cost) {
+      AudioSys.sfx('ui');
+      return;
+    }
+    if (player.hp >= player.maxHp - 0.5) {
+      showToast('ALREADY WHOLE', 'Your body holds together for now.', 1.5);
+      AudioSys.sfx('ui');
+      return;
+    }
+    player.energy -= CONFIG.heal.cost;
+    const amount = m.healAmount;
+    player.hp = Math.min(player.maxHp, player.hp + amount);
+    player.healCd = CONFIG.heal.cooldown;
+    player.invuln = Math.max(player.invuln, 0.5);
+    addFloater(player.x, player.y - 96 * depthScale(player.y), '+' + Math.round(amount) + ' HP', '#8affc4', 16);
+    addRing(player.x, player.y, 96, 0.6, '#7dffb0', 4);
+    burst(player.x, player.y - 40, 16, ['#7dffb0', '#d6fff0', '#8fe6ff'], 180, { size: 2.4, gravity: -90, life: 0.8 });
+    AudioSys.sfx('core');
+  }
+
+  /* ---------- 8c. ALLY ASSIST ---------- */
+  const ally = {
+    active: false, name: 'SARA', x: 0, y: 0, side: -1,
+    cd: 2, t: 0, phase: 0, shotT: 0, kind: 'sara'
+  };
+  const allyShots = [];
+
+  function grantAlly() {
+    ally.active = true;
+    ally.cd = 1.2;
+    ally.t = 0;
+    allyShots.length = 0;
+    placeAlly();
+  }
+
+  function placeAlly() {
+    ally.side = player.x < (arena.left + arena.right) / 2 ? -1 : 1;
+    ally.x = ally.side < 0 ? arena.left + (arena.right - arena.left) * CONFIG.ally.offset
+      : arena.right - (arena.right - arena.left) * CONFIG.ally.offset;
+    ally.y = arena.bottom - 42;
+  }
+
+  function updateAlly(sdt) {
+    if (!ally.active) return;
+    ally.t += sdt;
+    ally.cd -= sdt;
+    // drift to stay near the player but on the arena flank
+    const targetX = (player.x + ally.side * 150);
+    const clampedX = clamp(targetX, arena.left + 46, arena.right - 46);
+    ally.x += clamp(clampedX - ally.x, -110 * sdt, 110 * sdt);
+    ally.y += clamp((arena.bottom - 40) - ally.y, -80 * sdt, 80 * sdt);
+    if (ally.cd <= 0 && !player.dead) {
+      let target = null, best = 1e9;
+      for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        if (e.dead || e.spawnT > 0) continue;
+        const d = Math.hypot(e.x - ally.x, e.y - ally.y);
+        if (d < best) { best = d; target = e; }
+      }
+      if (boss && boss.active && !boss.dormant && boss.state !== 'dying') {
+        const d = Math.hypot(boss.x - ally.x, boss.y - ally.y);
+        if (d < best) { best = d; target = boss; }
+      }
+      if (target && best < 700) {
+        ally.cd = CONFIG.ally.cooldown;
+        const ang = Math.atan2((target.y - 40) - (ally.y - 34), target.x - ally.x);
+        allyShots.push({
+          x: ally.x, y: ally.y - 34,
+          vx: Math.cos(ang) * CONFIG.ally.shotSpeed,
+          vy: Math.sin(ang) * CONFIG.ally.shotSpeed,
+          life: 1.8, r: 7, damage: CONFIG.ally.damage * run.modifiers.dmg, trail: 0
+        });
+        ally.shotT = 0.22;
+        burst(ally.x, ally.y - 34, 5, ['#ff9ad9', '#ffffff'], 120, { size: 1.8, gravity: 0, life: 0.35 });
+        AudioSys.sfx('pickup');
+      } else {
+        ally.cd = 0.6;
+      }
+    }
+    ally.shotT = Math.max(0, ally.shotT - sdt);
+  }
+
+  function updateAllyShots(sdt) {
+    for (let i = allyShots.length - 1; i >= 0; i--) {
+      const s = allyShots[i];
+      s.x += s.vx * sdt;
+      s.y += s.vy * sdt;
+      s.life -= sdt;
+      let hit = false;
+      for (let j = enemies.length - 1; j >= 0; j--) {
+        const e = enemies[j];
+        if (e.dead || e.spawnT > 0) continue;
+        if (circleHit(s.x, s.y, s.r, e.x, e.y - 30 * depthScale(e.y), e.r + 8, 1.2)) {
+          hitEnemy(e, s.damage, { dir: sign(s.vx), knock: 90, ally: true });
+          hit = true;
+          break;
+        }
+      }
+      if (!hit && boss && boss.active && !boss.dormant && boss.state !== 'dying' && boss.iframe <= 0) {
+        if (circleHit(s.x, s.y, s.r, boss.x, boss.y - 60, boss.r + 10, 1.2)) {
+          hitBoss(s.damage * 0.8, false);
+          hit = true;
+        }
+      }
+      if (hit || s.life <= 0) {
+        burst(s.x, s.y, 4, ['#ff9ad9', '#ffffff'], 90, { size: 1.6, gravity: 0, life: 0.3 });
+        allyShots.splice(i, 1);
+      }
+    }
+  }
 
   const ENEMY_LABEL = { grunt: 'wraith claws', stalker: 'stalker blades', brute: 'brute charge' };
   const enemies = [];
@@ -1886,9 +2304,12 @@
     player.y = arena.bottom - 46;
     player.z = 0; player.vz = 0; player.vx = 0; player.vy = 0; player.kx = 0; player.ky = 0;
     player.facing = 1;
-    player.maxHp = CONFIG.player.maxHp;
+    recomputeModifiers();
+    player.maxHp = CONFIG.player.maxHp + run.modifiers.maxHp;
+    player.maxEnergy = CONFIG.player.maxEnergy + run.modifiers.energyMax;
     player.hp = fullHeal === false ? Math.min(player.hp, player.maxHp) : player.maxHp;
     player.energy = player.maxEnergy;
+    player.healCd = 0;
     player.grounded = true;
     player.invuln = 1.0;
     player.hitFlash = 0;
@@ -1936,6 +2357,7 @@
     player.shootCd = Math.max(0, player.shootCd - sdt);
     player.attackCd = Math.max(0, player.attackCd - sdt);
     player.specialCd = Math.max(0, player.specialCd - sdt);
+    player.healCd = Math.max(0, player.healCd - sdt);
     player.attackSwingT = Math.max(0, player.attackSwingT - sdt);
     player.landT = Math.max(0, player.landT - sdt);
     player.comboStepTimer = Math.max(0, player.comboStepTimer - sdt);
@@ -1953,7 +2375,7 @@
     }
 
     // Energy regeneration
-    player.energy = Math.min(player.maxEnergy, player.energy + CONFIG.player.energyRegen * sdt);
+    player.energy = Math.min(player.maxEnergy, player.energy + CONFIG.player.energyRegen * run.modifiers.energyRegen * sdt);
 
     // Jump
     if (pressed.jump && player.grounded && player.dashT <= 0) {
@@ -1982,7 +2404,7 @@
       player.dashDirX = dx / len;
       player.dashDirY = dy / len;
       player.dashT = CONFIG.player.dashDuration;
-      player.dashCd = CONFIG.player.dashCooldown;
+      player.dashCd = CONFIG.player.dashCooldown * (1 - Math.min(0.45, (run.modifiers.dash - 1) * 0.55));
       player.invuln = Math.max(player.invuln, CONFIG.player.dashInvuln + CONFIG.player.dashDuration);
       player.attackT = 0;
       player.ghostT = 0;
@@ -2043,8 +2465,9 @@
 
     // Energy shot
     if ((pressed.energy || (held.energy && player.shootCd <= 0)) && player.shootCd <= 0 && player.dashT <= 0) {
-      if (player.energy >= CONFIG.player.shootCost) {
-        player.energy -= CONFIG.player.shootCost;
+      const shotCost = CONFIG.player.shootCost * run.modifiers.shotCostMult;
+      if (player.energy >= shotCost) {
+        player.energy -= shotCost;
         player.shootCd = CONFIG.player.shootCooldown;
         firePlayerShot();
       } else {
@@ -2067,6 +2490,8 @@
         doSpecial();
       }
     }
+
+    if (pressed.heal) doHeal();
 
     // Awakening ambient aura
     if (player.awake && !settings.reducedFx && Math.random() < sdt * 34) {
@@ -2092,13 +2517,13 @@
       if (!circleHit(cx, cy, range * 0.62, e.x, e.y, e.r + 8, 1.25)) continue;
       if ((e.x - player.x) * player.facing < -12) continue;
       player.attackHits.push(e.id);
-      hitEnemy(e, dmg * (1 + (Game.mult - 1) * 0.15), { heavy: heavy, dir: player.facing, knock: heavy ? 300 : 170 });
+      hitEnemy(e, dmg * run.modifiers.dmg * (1 + (Game.mult - 1) * 0.15), { heavy: heavy, dir: player.facing, knock: heavy ? 300 : 170 });
     }
 
     if (boss && boss.active && boss.state !== 'dying' && boss.hp > 0) {
       if (player.attackHits.indexOf(-1) === -1 && circleHit(cx, cy, range * 0.7, boss.x, boss.y - 20, boss.r + 14, 1.2)) {
         player.attackHits.push(-1);
-        hitBoss(dmg * (1 + (Game.mult - 1) * 0.15), heavy);
+        hitBoss(dmg * run.modifiers.dmg * (1 + (Game.mult - 1) * 0.15), heavy);
       }
     }
 
@@ -2122,7 +2547,7 @@
       x: player.x + player.facing * 26, y: py,
       vx: player.facing * CONFIG.player.projectileSpeed,
       vy: 0, life: CONFIG.player.projectileLife, r: 9,
-      damage: CONFIG.player.shootDamage, trail: 0
+      damage: CONFIG.player.shootDamage * run.modifiers.dmg, trail: 0
     });
     burst(player.x + player.facing * 30, py, 5, ['#7fe4ff', '#b9a7ff', '#ffffff'], 130, { size: 1.8, gravity: 0, life: 0.3 });
     AudioSys.sfx('shoot');
@@ -2143,18 +2568,18 @@
     addRing(player.x, player.y, CONFIG.player.specialRadius, 0.62, '#8fe6ff', 7);
     addRing(player.x, player.y, CONFIG.player.specialRadius * 0.82, 0.5, '#ffcf7a', 4);
     burst(player.x, player.y - 20, 34, ['#8fe6ff', '#ffce6a', '#a45cff', '#ffffff'], 380, { size: 3.4, gravity: 120, life: 0.8 });
-    const R = CONFIG.player.specialRadius;
+    const R = CONFIG.player.specialRadius * (0.92 + (run.modifiers.special - 1) * 0.5);
     for (let i = enemies.length - 1; i >= 0; i--) {
       const e = enemies[i];
       if (e.spawnT > 0) continue;
       if (Math.hypot(e.x - player.x, (e.y - player.y) * 1.3) <= R) {
-        hitEnemy(e, CONFIG.player.specialDamage, { heavy: true, dir: sign(e.x - player.x), knock: 420, special: true });
+        hitEnemy(e, CONFIG.player.specialDamage * run.modifiers.special, { heavy: true, dir: sign(e.x - player.x), knock: 420, special: true });
         addFloater(e.x, e.y - 70, 'BURST', '#9fe9ff', 13);
       }
     }
     if (boss && boss.active && boss.state !== 'dying') {
       if (Math.hypot(boss.x - player.x, (boss.y - player.y) * 1.25) <= R + 30) {
-        hitBoss(CONFIG.player.specialDamage * 1.4, true);
+        hitBoss(CONFIG.player.specialDamage * run.modifiers.special * 1.4, true);
       }
     }
   }
@@ -2447,6 +2872,7 @@
     shakeScreen(e.type === 'brute' ? 9 : 4);
     AudioSys.sfx('hit');
     // drops
+    gainXp(e.cfg.xp || 12);
     if (chance(e.cfg.energyDrop)) spawnPickup(e.x, e.y, 'energy');
     if (chance(e.cfg.coreDrop)) spawnPickup(e.x, e.y, 'core');
   }
@@ -2760,7 +3186,10 @@
       { sp: 'Katleen', text: 'Impossible... that light. Where does it come from, boy?', cls: 'speaker-c' },
       { sp: 'Ajees', text: 'From everyone who told me to keep standing.', cls: 'speaker-a' }
     ], function () {
-      if (boss) boss.iframe = Math.max(boss.iframe, 0.6);
+      showChoice('resolve', function () {
+        if (boss) boss.iframe = Math.max(boss.iframe, 0.9);
+        Game.state = 'PLAYING';
+      });
     });
   }
 
@@ -2791,6 +3220,7 @@
     hazards.length = 0;
     Game.bossDefeated = true;
     Game.score += CONFIG.scoring.bossDefeat;
+    gainXp(CONFIG.xp.bossBonus);
     Game.slowmo = 0.35;
     clearHeld();
     screenFlash('#ffffff', 0.75);
@@ -2824,7 +3254,9 @@
       { sp: 'narrator', text: 'The rift seals. For the first time in hours, the campus breathes.' },
       { sp: 'Sara', text: 'You are still here. You are still you.', cls: 'speaker-b' }
     ], function () {
-      showVictory(best);
+      showChoice('ending', function () {
+        showVictory(best);
+      });
     });
   }
 
@@ -2963,6 +3395,7 @@
           player.energy = Math.min(player.maxEnergy, player.energy + CONFIG.pickups.energy);
           Game.energyCollected++;
           Game.score += CONFIG.scoring.energyOrb;
+          gainXp(CONFIG.xp.orbXp);
           addFloater(p.x, p.y - 30, '+' + CONFIG.pickups.energy + ' NRG', '#7fe4ff', 13);
           AudioSys.sfx('pickup');
           burst(p.x, p.y, 8, ['#7fe4ff', '#ffffff'], 120, { size: 2, gravity: 0, life: 0.5 });
@@ -3110,7 +3543,8 @@
     bgCanvas.height = Math.max(2, Math.round(H * K));
     bgCtx.setTransform(K, 0, 0, K, 0, 0);
     bgCtx.clearRect(0, 0, W, H);
-    if (stageNum === 2) paintRiftStatic(bgCtx, W, H);
+    if (stageNum === 0) paintClassroomStatic(bgCtx, W, H);
+    else if (stageNum === 2) paintRiftStatic(bgCtx, W, H);
     else if (stageNum === 3) paintRealmStatic(bgCtx, W, H);
     else paintCampusStatic(bgCtx, W, H);
     bgStageNum = stageNum;
@@ -3121,7 +3555,7 @@
   function buildBgData(stageNum, W, H) {
     const rng = mulberry32(stageNum * 7919 + 31);
     const stars = [], clouds = [], debris = [], motes = [], spikes = [], lamps = [];
-    const starCount = stageNum === 3 ? 150 : 90;
+    const starCount = stageNum === 3 ? 150 : (stageNum === 0 ? 24 : 90);
     for (let i = 0; i < starCount; i++) {
       stars.push({
         x: rng() * W, y: rng() * H * 0.48, r: 0.6 + rng() * 1.6,
@@ -3168,6 +3602,12 @@
     c.arcTo(x, y + h, x, y, rad);
     c.arcTo(x, y, x + w, y, rad);
     c.closePath();
+  }
+
+  function ctxFillRound(c, x, y, w, h, r, fill) {
+    rr(c, x, y, w, h, r);
+    c.fillStyle = fill;
+    c.fill();
   }
 
   function paintWindowGrid(c, x, y, w, h, cols, rows, rng, litColor, dimColor, litChance) {
@@ -3217,6 +3657,222 @@
       c.fill();
     }
     c.restore();
+  }
+
+  /* ---------- PROLOGUE: PMIST CLASSROOM AT 6:42 PM ---------- */
+  function paintClassroomStatic(c, W, H) {
+    const rng = mulberry32(1234);
+    // back wall
+    const wall = c.createLinearGradient(0, 0, W, H);
+    wall.addColorStop(0, '#0a0e1e');
+    wall.addColorStop(0.55, '#121530');
+    wall.addColorStop(1, '#1b1730');
+    c.fillStyle = wall;
+    c.fillRect(0, 0, W, H);
+
+    // ceiling
+    const ceil = c.createLinearGradient(0, 0, 0, H * 0.16);
+    ceil.addColorStop(0, '#05070f');
+    ceil.addColorStop(1, '#0d1122');
+    c.fillStyle = ceil;
+    c.fillRect(0, 0, W, H * 0.16);
+    // ceiling light strips
+    for (let i = 0; i < 4; i++) {
+      const lx = W * (0.12 + i * 0.24);
+      c.fillStyle = 'rgba(190,215,255,0.10)';
+      c.fillRect(lx - 70, H * 0.055, 140, 7);
+      const lg = c.createLinearGradient(lx, H * 0.06, lx, H * 0.5);
+      lg.addColorStop(0, 'rgba(180,210,255,0.10)');
+      lg.addColorStop(1, 'rgba(180,210,255,0)');
+      c.fillStyle = lg;
+      c.beginPath();
+      c.moveTo(lx - 60, H * 0.065);
+      c.lineTo(lx + 60, H * 0.065);
+      c.lineTo(lx + 150, H * 0.56);
+      c.lineTo(lx - 150, H * 0.56);
+      c.closePath();
+      c.fill();
+    }
+
+    // blackboard (left)
+    const bbX = W * 0.055, bbY = H * 0.2, bbW = W * 0.34, bbH = H * 0.36;
+    c.fillStyle = '#0c1524';
+    c.fillRect(bbX - 8, bbY - 8, bbW + 16, bbH + 16);
+    const bb = c.createLinearGradient(bbX, bbY, bbX + bbW, bbY + bbH);
+    bb.addColorStop(0, '#12261f');
+    bb.addColorStop(1, '#0b1a17');
+    c.fillStyle = bb;
+    c.fillRect(bbX, bbY, bbW, bbH);
+    // faint chalk
+    c.save();
+    c.globalAlpha = 0.16;
+    c.strokeStyle = '#dff3ff';
+    c.lineWidth = 2;
+    c.font = 'italic 700 ' + Math.round(H * 0.028) + 'px ' + FONT;
+    c.fillStyle = '#e6f6ff';
+    c.fillText('Physics · Unit 7', bbX + 22, bbY + 46);
+    c.font = '400 ' + Math.round(H * 0.022) + 'px ' + FONT;
+    c.fillText('f = m · a', bbX + 26, bbY + 86);
+    c.fillText('E = mc²', bbX + 26, bbY + 118);
+    c.beginPath();
+    c.moveTo(bbX + 24, bbY + 138);
+    c.quadraticCurveTo(bbX + 90, bbY + 126, bbX + 150, bbY + 140);
+    c.stroke();
+    c.beginPath();
+    c.arc(bbX + 186, bbY + 120, 26, 0, TAU);
+    c.stroke();
+    c.globalAlpha = 0.12;
+    c.font = 'italic 700 ' + Math.round(H * 0.026) + 'px ' + FONT;
+    c.fillText('“the sky cracked.”', bbX + 118, bbY + 190);
+    c.restore();
+    // chalk tray
+    c.fillStyle = '#182238';
+    c.fillRect(bbX - 8, bbY + bbH + 8, bbW + 16, 8);
+
+    // big windows (right)
+    const wx = W * 0.47, wy = H * 0.17, ww = W * 0.48, wh = H * 0.47;
+    c.fillStyle = '#0a0f1c';
+    c.fillRect(wx - 12, wy - 12, ww + 24, wh + 24);
+    const sky = c.createLinearGradient(wx, wy, wx, wy + wh);
+    sky.addColorStop(0, '#241a52');
+    sky.addColorStop(0.42, '#5b2a60');
+    sky.addColorStop(0.72, '#c2564f');
+    sky.addColorStop(1, '#f09a5a');
+    c.fillStyle = sky;
+    c.fillRect(wx, wy, ww, wh);
+    // sun glow
+    const sg = c.createRadialGradient(wx + ww * 0.62, wy + wh * 0.72, 0, wx + ww * 0.62, wy + wh * 0.72, wh * 0.7);
+    sg.addColorStop(0, 'rgba(255,224,170,0.85)');
+    sg.addColorStop(0.35, 'rgba(255,170,110,0.35)');
+    sg.addColorStop(1, 'rgba(255,150,90,0)');
+    c.fillStyle = sg;
+    c.fillRect(wx, wy, ww, wh);
+    // far buildings through the glass
+    c.fillStyle = 'rgba(20,14,36,0.9)';
+    for (let i = 0; i < 7; i++) {
+      const bx = wx + rng() * ww;
+      const bw = 30 + rng() * 60;
+      const bh = 20 + rng() * 80;
+      c.fillRect(bx, wy + wh - bh, bw, bh);
+    }
+    c.fillStyle = 'rgba(255,190,120,0.5)';
+    for (let i = 0; i < 40; i++) {
+      c.fillRect(wx + rng() * ww, wy + wh - rng() * 70, 2, 2);
+    }
+    // window mullions
+    c.fillStyle = '#0b1120';
+    for (let i = 1; i < 4; i++) c.fillRect(wx + (ww / 4) * i - 5, wy, 10, wh);
+    c.fillRect(wx, wy + wh * 0.45, ww, 9);
+    // frame
+    c.strokeStyle = 'rgba(120,150,220,0.22)';
+    c.lineWidth = 3;
+    c.strokeRect(wx, wy, ww, wh);
+
+    // desks in perspective
+    const floorY = H * 0.64;
+    const floor = c.createLinearGradient(0, floorY, 0, H);
+    floor.addColorStop(0, '#141827');
+    floor.addColorStop(1, '#070910');
+    c.fillStyle = floor;
+    c.fillRect(0, floorY, W, H - floorY);
+    // sunset light pools on the floor
+    const pool = c.createRadialGradient(wx + ww * 0.5, H * 0.82, 0, wx + ww * 0.5, H * 0.82, W * 0.5);
+    pool.addColorStop(0, 'rgba(255,160,100,0.18)');
+    pool.addColorStop(1, 'rgba(255,160,100,0)');
+    c.fillStyle = pool;
+    c.fillRect(0, floorY, W, H - floorY);
+
+    // desk rows receding toward the back wall
+    for (let row = 3; row >= 0; row--) {
+      const depth = 0.62 + row * 0.13;
+      const y = floorY + (H - floorY) * (0.1 + row * 0.235);
+      const deskH = 30 * depth;
+      const deskW = 88 * depth;
+      const gap = deskW * 1.28;
+      const cols = 5;
+      const aisle = deskW * 0.8;
+      for (let i = 0; i < cols; i++) {
+        // split into two blocks with a central aisle
+        const side = i < 2 ? -1 : 1;
+        const k = i < 2 ? i : i - 3;
+        const x = VW * 0.5 + side * (aisle + gap * (k + (i < 2 ? 1.1 : 0.55)));
+        const alpha = 0.55 + row * 0.1;
+        // chair back (behind the desk)
+        ctxFillRound(c, x - deskW * 0.34, y - deskH * 0.72, deskW * 0.68, deskH * 0.42, 4, 'rgba(5,7,14,' + alpha + ')');
+        // legs
+        c.fillStyle = 'rgba(8,10,18,' + alpha + ')';
+        c.fillRect(x - deskW * 0.42, y - deskH * 0.08, deskW * 0.07, deskH * 0.86);
+        c.fillRect(x + deskW * 0.35, y - deskH * 0.08, deskW * 0.07, deskH * 0.86);
+        // desktop surface
+        const top = c.createLinearGradient(x - deskW / 2, y - deskH * 0.2, x + deskW / 2, y);
+        top.addColorStop(0, 'rgba(34,30,44,' + (alpha + 0.16) + ')');
+        top.addColorStop(1, 'rgba(12,12,22,' + (alpha + 0.2) + ')');
+        c.fillStyle = top;
+        c.beginPath();
+        c.moveTo(x - deskW * 0.5, y - deskH * 0.2);
+        c.lineTo(x + deskW * 0.5, y - deskH * 0.24);
+        c.lineTo(x + deskW * 0.44, y);
+        c.lineTo(x - deskW * 0.44, y);
+        c.closePath();
+        c.fill();
+        // front edge highlight
+        c.fillStyle = 'rgba(255,190,130,' + (0.05 + row * 0.012) + ')';
+        c.fillRect(x - deskW * 0.46, y - deskH * 0.06, deskW * 0.9, 2);
+        // notebook
+        c.fillStyle = 'rgba(150,170,220,0.10)';
+        c.fillRect(x - deskW * 0.2, y - deskH * 0.34, deskW * 0.34, deskH * 0.08);
+      }
+    }
+
+    // foreground desk silhouettes for depth
+    c.fillStyle = 'rgba(2,3,8,0.92)';
+    c.beginPath();
+    c.moveTo(VW * 0.06, H);
+    c.lineTo(VW * 0.1, H * 0.9);
+    c.lineTo(VW * 0.34, H * 0.93);
+    c.lineTo(VW * 0.36, H);
+    c.closePath();
+    c.fill();
+    c.beginPath();
+    c.moveTo(VW * 0.64, H);
+    c.lineTo(VW * 0.68, H * 0.92);
+    c.lineTo(VW * 0.94, H * 0.9);
+    c.lineTo(VW * 0.96, H);
+    c.closePath();
+    c.fill();
+
+    // wall clock
+    c.beginPath();
+    c.arc(VW * 0.44, H * 0.17, H * 0.028, 0, TAU);
+    c.fillStyle = 'rgba(226,232,255,0.18)';
+    c.fill();
+    c.strokeStyle = 'rgba(226,232,255,0.4)';
+    c.lineWidth = 1.6;
+    c.stroke();
+    c.strokeStyle = 'rgba(226,232,255,0.55)';
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(VW * 0.44, H * 0.17);
+    c.lineTo(VW * 0.44, H * 0.152);
+    c.moveTo(VW * 0.44, H * 0.17);
+    c.lineTo(VW * 0.452, H * 0.176);
+    c.stroke();
+
+    // doorway glow (left)
+    const dg = c.createLinearGradient(W * 0.02, H * 0.3, W * 0.02, H * 0.7);
+    dg.addColorStop(0, 'rgba(120,170,255,0)');
+    dg.addColorStop(0.5, 'rgba(120,170,255,0.06)');
+    dg.addColorStop(1, 'rgba(120,170,255,0)');
+    c.fillStyle = dg;
+    c.fillRect(0, H * 0.2, W * 0.03, H * 0.6);
+
+    // soft dust
+    for (let i = 0; i < 60; i++) {
+      c.globalAlpha = 0.05 + rng() * 0.12;
+      c.fillStyle = '#ffe9c8';
+      c.fillRect(rng() * W, rng() * H * 0.8, 1.6, 1.6);
+    }
+    c.globalAlpha = 1;
   }
 
   /* ---------- STAGE 1: PMIST CAMPUS AT DUSK ---------- */
@@ -3834,14 +4490,37 @@
   }
 
   function drawBackground() {
-    const stageNum = Game.state === 'TITLE' ? 1 : Game.stage;
+    const stageNum = Game.classroomScene ? 0 : (Game.state === 'TITLE' ? 1 : Game.stage);
     if (bgStageNum !== stageNum) buildStaticBackground(stageNum);
-    const par = (player.x - VW / 2) * -0.028;
+    const par = Game.classroomScene ? 0 : (player.x - VW / 2) * -0.028;
     ctx.drawImage(bgCanvas, -BG_MARGIN / 2 + par, 0, bgW, bgH);
-    if (Game.state === 'TITLE' || Game.stage === 1) drawCampusDynamics();
+    if (stageNum === 0) drawClassroomDynamics();
+    else if (Game.state === 'TITLE' || Game.stage === 1) drawCampusDynamics();
     else if (Game.stage === 2) drawRiftDynamics();
     else drawRealmDynamics();
     drawAmbientMotes();
+  }
+
+  function drawClassroomDynamics() {
+    const t = Game.clock;
+    // shifting sunbeam through the window
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    const bx = VW * 0.74, by = VH * 0.42;
+    drawGlowSprite(bx, by, VH * 0.9, '#ff9a55', 0.07 + Math.sin(t * 0.7) * 0.015);
+    drawGlowSprite(VW * 0.62, VH * 0.72, VH * 0.7, '#ffce8a', 0.045);
+    ctx.restore();
+    // slow drifting dust
+    ctx.save();
+    for (let i = 0; i < 22; i++) {
+      const seed = i * 97.13;
+      const x = ((seed * 2.3 + t * (5 + (i % 4) * 3)) % VW);
+      const y = VH * 0.2 + (((seed * 1.7 + t * (3 + (i % 5) * 2)) % (VH * 0.62)));
+      ctx.globalAlpha = 0.16 + 0.12 * Math.sin(t * 1.4 + i);
+      ctx.fillStyle = i % 3 === 0 ? '#ffd9a8' : '#cfe0ff';
+      ctx.fillRect(x, y, 2, 2);
+    }
+    ctx.restore();
   }
 
   function drawCampusDynamics() {
@@ -5213,6 +5892,142 @@
     }
   }
 
+  function drawAlly(a) {
+    if (!a.active) return;
+    const s = depthScale(a.y) * charScale * 0.95;
+    const bob = Math.sin(Game.clock * 2.6) * 2;
+    drawGroundShadow(a.x, a.y, 24 * s, 0.45);
+    ctx.save();
+    ctx.translate(a.x, a.y + bob);
+    ctx.scale((a.x < player.x ? 1 : -1) * s, s);
+
+    // support aura
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    drawGlowSpriteLocal(0, -50, 130, '#ff7ce0', 0.14 + Math.sin(Game.clock * 3) * 0.04);
+    ctx.restore();
+
+    // legs
+    ctx.strokeStyle = '#1a0f26';
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-4, -44); ctx.lineTo(-5, -20); ctx.lineTo(-6, -2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(4, -44); ctx.lineTo(5, -20); ctx.lineTo(6, -2); ctx.stroke();
+
+    // skirt / coat
+    const skirt = ctx.createLinearGradient(0, -70, 0, -6);
+    skirt.addColorStop(0, '#33163f');
+    skirt.addColorStop(1, '#120a1c');
+    ctx.beginPath();
+    ctx.moveTo(-10, -62);
+    ctx.quadraticCurveTo(-20, -34, -15, -6);
+    ctx.lineTo(15, -6);
+    ctx.quadraticCurveTo(20, -34, 10, -62);
+    ctx.closePath();
+    ctx.fillStyle = skirt;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,124,224,0.55)';
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+
+    // torso
+    ctx.beginPath();
+    ctx.moveTo(-9, -60);
+    ctx.quadraticCurveTo(-13, -74, -7, -84);
+    ctx.quadraticCurveTo(0, -88, 7, -84);
+    ctx.quadraticCurveTo(13, -74, 9, -60);
+    ctx.closePath();
+    ctx.fillStyle = '#2a1440';
+    ctx.fill();
+
+    // long hair
+    const hair = ctx.createLinearGradient(0, -110, 0, -50);
+    hair.addColorStop(0, '#3b1b4d');
+    hair.addColorStop(1, '#1e0f2a');
+    ctx.beginPath();
+    ctx.moveTo(-10, -96);
+    ctx.quadraticCurveTo(-22, -80, -18, -48);
+    ctx.quadraticCurveTo(-12, -62, -7, -84);
+    ctx.closePath();
+    ctx.fillStyle = hair;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(10, -96);
+    ctx.quadraticCurveTo(22, -80, 18, -48);
+    ctx.quadraticCurveTo(12, -62, 7, -84);
+    ctx.closePath();
+    ctx.fill();
+
+    // head
+    ctx.beginPath();
+    ctx.ellipse(1, -94, 9, 9.8, 0, 0, TAU);
+    ctx.fillStyle = '#f0cbb8';
+    ctx.fill();
+    // fringe
+    ctx.beginPath();
+    ctx.moveTo(-8.4, -96);
+    ctx.quadraticCurveTo(-10, -104, 0, -105);
+    ctx.quadraticCurveTo(9, -105, 10, -97);
+    ctx.lineTo(8, -92);
+    ctx.lineTo(5, -98);
+    ctx.lineTo(2, -93);
+    ctx.lineTo(-2, -99);
+    ctx.lineTo(-5, -94);
+    ctx.lineTo(-8, -99);
+    ctx.closePath();
+    ctx.fillStyle = hair;
+    ctx.fill();
+    // eyes
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    drawGlowSpriteLocal(4.4, -94, 12, '#ff9ad9', 0.7);
+    drawGlowSpriteLocal(8.4, -94, 8, '#ff9ad9', 0.5);
+    ctx.restore();
+    ctx.fillStyle = '#ffe9fb';
+    ctx.beginPath();
+    ctx.moveTo(2.6, -95); ctx.lineTo(5.4, -95.4); ctx.lineTo(5.2, -93.4);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(7, -95); ctx.lineTo(9.4, -95.2); ctx.lineTo(9.2, -93.6);
+    ctx.closePath(); ctx.fill();
+
+    // arm holding a focus gem
+    ctx.strokeStyle = '#2a1440';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(8, -80);
+    ctx.lineTo(18, -70);
+    ctx.lineTo(22, -58);
+    ctx.stroke();
+    const pulse = 0.6 + Math.sin(Game.clock * 5) * 0.25;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    drawGlowSpriteLocal(23, -58, 34, '#ff7ce0', 0.55 * pulse);
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(23, -58, 3, 0, TAU);
+    ctx.fillStyle = '#ffe6fb';
+    ctx.fill();
+    ctx.restore();
+
+    // ground support ring + name
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = 'rgba(255,140,225,0.55)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.ellipse(a.x, a.y + 2, 22, 8, 0, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.font = '700 9px ' + FONT;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(255,190,240,0.85)';
+    ctx.fillText('SARA', a.x, a.y - 116 * s);
+    ctx.restore();
+  }
+
   function drawBossTelegraphs(b) {
     if (!b || !b.active || b.dormant || b.state === 'dying') return;
     const groundY = b.y;
@@ -5414,6 +6229,18 @@
       ctx.arc(s.x, s.y, s.r * 0.38, 0, TAU);
       ctx.fill();
     }
+    // ally support bolts
+    for (let i = 0; i < allyShots.length; i++) {
+      const s = allyShots[i];
+      drawGlowSprite(s.x, s.y, s.r * 6, '#ff7ce0', 0.5);
+      drawGlowSprite(s.x, s.y, s.r * 2.4, '#ffffff', 0.8);
+      ctx.strokeStyle = 'rgba(255,140,225,0.45)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(s.x - s.vx * 0.02, s.y - s.vy * 0.02);
+      ctx.lineTo(s.x, s.y);
+      ctx.stroke();
+    }
     // player shots
     for (let i = 0; i < pShots.length; i++) {
       const s = pShots[i];
@@ -5552,6 +6379,7 @@
     drawList.length = 0;
     for (let i = 0; i < enemies.length; i++) drawList.push(enemies[i]);
     if (boss && boss.active) drawList.push(boss);
+    if (ally.active) drawList.push(ally);
     if (!player.dead || player.deathT > 0) drawList.push(player);
     drawList.sort(function (a, b) { return a.y - b.y; });
 
@@ -5559,6 +6387,8 @@
       const ent = drawList[i];
       if (ent === player) {
         drawPlayer(player);
+      } else if (ent === ally) {
+        drawAlly(ally);
       } else if (ent === boss) {
         drawBoss(boss);
       } else {
@@ -5717,17 +6547,23 @@
     hudEls.abAtk = el('ab-atk');
     hudEls.abEn = el('ab-en');
     hudEls.abSp = el('ab-sp');
+    hudEls.abHeal = el('ab-heal');
     hudEls.abDash = el('ab-dash');
+    hudEls.level = el('hud-level');
+    hudEls.xpBar = el('xp-fill');
+    hudEls.xpText = el('hud-xp');
     hudEls.abAtkFill = hudEls.abAtk ? hudEls.abAtk.querySelector('.fill') : null;
     hudEls.abEnFill = hudEls.abEn ? hudEls.abEn.querySelector('.fill') : null;
     hudEls.abSpFill = hudEls.abSp ? hudEls.abSp.querySelector('.fill') : null;
     hudEls.abDashFill = hudEls.abDash ? hudEls.abDash.querySelector('.fill') : null;
+    hudEls.abHealFill = hudEls.abHeal ? hudEls.abHeal.querySelector('.fill') : null;
     hudEls.touch = el('touch');
   }
 
   function updateHUD() {
     const visible = Game.state === 'PLAYING' || Game.state === 'PAUSED' || Game.state === 'DIALOGUE' ||
-      Game.state === 'STAGE_TRANSITION' || Game.state === 'BOSS_INTRO';
+      Game.state === 'STAGE_TRANSITION' || Game.state === 'BOSS_INTRO' || Game.state === 'UPGRADE' ||
+      Game.state === 'CHOICE';
     show(hudEls.hud, visible);
     document.body.classList.toggle('in-game', visible);
     if (!visible) return;
@@ -5792,6 +6628,23 @@
     const dashReady = player.dashCd <= 0;
     hudEls.abDash.classList.toggle('ready', dashReady);
     if (hudEls.abDashFill) hudEls.abDashFill.style.height = (clamp(player.dashCd / CONFIG.player.dashCooldown, 0, 1) * 100) + '%';
+    const healOn = run.modifiers.heal;
+    const healReady = healOn && player.healCd <= 0 && player.energy >= CONFIG.heal.cost;
+    if (hudEls.abHeal) {
+      hudEls.abHeal.classList.toggle('ready', healReady);
+      hudEls.abHeal.classList.toggle('locked', !healOn);
+    }
+    if (hudEls.abHealFill) hudEls.abHealFill.style.height = (!healOn ? 100 : clamp(player.healCd / CONFIG.heal.cooldown, 0, 1) * 100) + '%';
+
+    // progression
+    if (hudEls.level) setText(hudEls.level, 'VESSEL LV.' + run.level);
+    if (hudEls.xpText) {
+      setText(hudEls.xpText, run.level >= CONFIG.xp.maxLevel ? 'MASTERED' : 'XP ' + Math.floor(run.xp) + ' / ' + run.xpNext);
+    }
+    if (hudEls.xpBar) {
+      const pct = run.level >= CONFIG.xp.maxLevel ? 100 : clamp(run.xp / run.xpNext, 0, 1) * 100;
+      hudEls.xpBar.style.width = pct + '%';
+    }
 
     // boss bar
     const bossVisible = !!(boss && boss.active);
@@ -5841,6 +6694,248 @@
   function hideTutorial() {
     Game.tutorialT = 0;
     show(el('tutorial'), false);
+  }
+
+  /* ============================ 18b. LEVEL-UP & CROSSROADS ============================ */
+  let upgradeOpen = false;
+
+  function tryOpenUpgrade() {
+    if (upgradeOpen || run.pendingLevels <= 0) return;
+    if (Game.state !== 'PLAYING') return;
+    openUpgradeScreen();
+  }
+
+  function pickUpgradeOfferings() {
+    const pool = [];
+    for (let i = 0; i < UPGRADES.length; i++) {
+      if (upgradeRank(UPGRADES[i].id) < UPGRADES[i].max) pool.push(UPGRADES[i]);
+    }
+    // Fisher-Yates
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    return pool.slice(0, 3);
+  }
+
+  function openUpgradeScreen() {
+    if (run.pendingLevels <= 0) return;
+    const picks = pickUpgradeOfferings();
+    if (!picks.length) {
+      // everything is mastered — spend the levels silently
+      run.pendingLevels = 0;
+      if (upgradeOpen) {
+        upgradeOpen = false;
+        hideAllScreens();
+        Game.state = 'PLAYING';
+      }
+      return;
+    }
+    upgradeOpen = true;
+    Game.state = 'UPGRADE';
+    clearHeld();
+    clearPressed();
+    hideTutorial();
+    hideAllScreens();
+    blurFocus();
+    setText(el('up-eyebrow'), 'VESSEL GROWTH · LV.' + run.level);
+    setText(el('up-title'), run.pendingLevels > 1 ? 'LEVEL UP ×' + run.pendingLevels : 'LEVEL UP');
+    setText(el('up-sub'), 'Choose one upgrade. The rift does not wait.');
+    const list = el('upgrade-list');
+    if (list) {
+      list.innerHTML = '';
+      picks.forEach(function (u, i) {
+        const rank = upgradeRank(u.id);
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'up-card';
+        card.style.setProperty('--upc', u.color);
+        card.setAttribute('data-upgrade', u.id);
+        card.innerHTML =
+          '<div class="up-icon">' + u.icon + '</div>' +
+          '<div class="up-name" style="color:' + u.color + '">' + u.name + '</div>' +
+          '<div class="up-desc">' + u.desc + '</div>' +
+          '<div class="up-rank">Rank <b>' + (rank + 1) + ' / ' + u.max + '</b> · press <b>' + (i + 1) + '</b></div>';
+        card.addEventListener('click', function (e) {
+          e.preventDefault();
+          chooseUpgrade(u.id);
+        });
+        list.appendChild(card);
+      });
+    }
+    show(el('screen-upgrade'), true);
+    AudioSys.sfx('awaken');
+  }
+
+  function chooseUpgrade(id) {
+    const def = UPGRADES.filter(function (u) { return u.id === id; })[0];
+    if (!def) return;
+    if (upgradeRank(id) >= def.max) {
+      // stale card (e.g. rank already mastered) — refresh the offerings
+      if (run.pendingLevels > 0) openUpgradeScreen();
+      return;
+    }
+    run.upgrades[id] = upgradeRank(id) + 1;
+    run.pendingLevels = Math.max(0, run.pendingLevels - 1);
+    recomputeModifiers();
+    if (run.pendingLevels > 0) {
+      openUpgradeScreen();
+    } else {
+      closeUpgradeScreen();
+    }
+    AudioSys.sfx('select');
+    showToast(def.name.toUpperCase() + ' · RANK ' + upgradeRank(id), def.desc, 2.6);
+  }
+
+  function closeUpgradeScreen() {
+    upgradeOpen = false;
+    hideAllScreens();
+    Game.state = 'PLAYING';
+    blurFocus();
+    clearPressed();
+    clearHeld();
+    player.invuln = Math.max(player.invuln, 0.6);
+    AudioSys.sfx('ui');
+  }
+
+  /* Crossroads: branching story choices that change skills and endings */
+  const CROSSROADS = {
+    path: {
+      head: 'CROSSROADS · THE RIFT ANSWERS',
+      options: [
+        {
+          title: 'Chase the answers',
+          note: 'Scholar path — your burst hits 25% harder.',
+          apply: function () { run.path = 'scholar'; run.choiceLog.push('scholar'); }
+        },
+        {
+          title: 'Protect the others',
+          note: 'Guardian path — unlock Mend and +15 max health.',
+          apply: function () { run.path = 'guardian'; run.choiceLog.push('guardian'); }
+        }
+      ]
+    },
+    allies: {
+      head: 'CROSSROADS · HOLD THE LINE TOGETHER',
+      options: [
+        {
+          title: 'Stand with Sara and the others',
+          note: 'Sara joins as support fire · +20 max health.',
+          apply: function () { run.allies = true; run.choiceLog.push('together'); grantAlly(); }
+        },
+        {
+          title: 'Send them to shelter — fight alone',
+          note: 'No support, but your strikes cut 18% deeper.',
+          apply: function () { run.allies = false; run.choiceLog.push('alone'); run.modifiers.dmg += 0.18; }
+        }
+      ]
+    },
+    resolve: {
+      head: 'CROSSROADS · WHAT THE VESSEL HOLDS',
+      options: [
+        {
+          title: 'Have faith in the people behind you',
+          note: 'Mend heals more · +6% damage · mercy ending open.',
+          apply: function () { run.resolve = 'faith'; run.choiceLog.push('faith'); }
+        },
+        {
+          title: 'Take the rift’s power for yourself',
+          note: '+22% damage · the rift remembers this.',
+          apply: function () { run.resolve = 'power'; run.choiceLog.push('power'); }
+        }
+      ]
+    },
+    ending: {
+      head: 'THE FINAL CHOICE',
+      options: [
+        {
+          title: 'Seal the rift and give the power back',
+          note: 'Ending — The Vessel’s Choice.',
+          apply: function () { run.ending = 'seal'; }
+        },
+        {
+          title: 'Keep the singularity inside you',
+          note: 'Ending — The Sovereign of the Rift.',
+          apply: function () { run.ending = 'sovereign'; }
+        },
+        {
+          title: 'Walk away and live an ordinary life',
+          note: 'Ending — A Quiet Morning.',
+          apply: function () { run.ending = 'dawn'; }
+        }
+      ]
+    }
+  };
+
+  const ENDINGS = {
+    seal: {
+      title: 'THE VESSEL’S CHOICE',
+      text: 'Ajees pours every spark of the singularity back into the wound in the sky. The rift folds shut like a held breath, and the campus lights come back on one window at a time.',
+      epilogue: 'Power given, not taken.'
+    },
+    sovereign: {
+      title: 'THE SOVEREIGN OF THE RIFT',
+      text: 'He does not close the door. He becomes the lock. The rift still whispers at the edge of campus, and the boy who was mortal now keeps watch over a world that does not know his name.',
+      epilogue: 'Power kept — and the price waits.'
+    },
+    dawn: {
+      title: 'A QUIET MORNING',
+      text: 'The vessel empties. Ajees wakes on the courtyard grass with no light in his hands and the whole ordinary day ahead of him. Somewhere far away, the rift remembers him anyway.',
+      epilogue: 'Power released. Life resumed.'
+    }
+  };
+
+  let choiceActive = false;
+  let choiceCallback = null;
+  let choiceOptions = [];
+
+  function showChoice(key, cb) {
+    const def = CROSSROADS[key];
+    if (!def) { if (cb) cb(); return; }
+    choiceActive = true;
+    choiceCallback = cb || null;
+    choiceOptions = def.options;
+    Game.state = 'CHOICE';
+    clearHeld();
+    clearPressed();
+    hideTutorial();
+    blurFocus();
+    setText(el('choice-head-text'), def.head);
+    setText(el('choice-hint'), def.options.length + ' OPTIONS · 1–' + def.options.length + ' OR TAP');
+    const list = el('choice-list');
+    if (list) {
+      list.innerHTML = '';
+      def.options.forEach(function (opt, i) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-btn';
+        btn.setAttribute('data-choice', String(i));
+        btn.innerHTML = '<span class="ck">' + (i + 1) + '</span><span><span class="ctxt">' + opt.title +
+          '</span><span class="cn">' + opt.note + '</span></span>';
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          pickChoice(i);
+        });
+        list.appendChild(btn);
+      });
+    }
+    show(el('choices'), true);
+    AudioSys.sfx('select');
+  }
+
+  function pickChoice(index) {
+    if (!choiceActive) return;
+    const opt = choiceOptions[index];
+    if (!opt) return;
+    choiceActive = false;
+    show(el('choices'), false);
+    AudioSys.sfx('select');
+    if (opt.apply) opt.apply();
+    recomputeModifiers();
+    if (Game.state === 'CHOICE') Game.state = 'PLAYING';
+    const cb = choiceCallback;
+    choiceCallback = null;
+    if (cb) cb();
   }
 
   /* ============================ 19. DIALOGUE ============================ */
@@ -6197,14 +7292,22 @@
   };
 
   /* ============================ 21. SCREENS & FLOW ============================ */
-  const SCREEN_IDS = ['screen-title', 'screen-howto', 'screen-settings', 'screen-highscore', 'screen-credits', 'screen-pause', 'screen-gameover', 'screen-victory'];
+  const SCREEN_IDS = ['screen-title', 'screen-howto', 'screen-settings', 'screen-highscore', 'screen-credits',
+    'screen-pause', 'screen-gameover', 'screen-victory', 'screen-upgrade'];
 
   function hideAllScreens() {
     for (let i = 0; i < SCREEN_IDS.length; i++) show(el(SCREEN_IDS[i]), false);
   }
 
+  function hideChoiceOverlay() {
+    choiceActive = false;
+    choiceCallback = null;
+    show(el('choices'), false);
+  }
+
   function showTitleScreen() {
     hideAllScreens();
+    hideChoiceOverlay();
     show(el('screen-title'), true);
     Game.state = 'TITLE';
     hideTutorial();
@@ -6240,6 +7343,7 @@
     setText(el('hs-victories'), fmt(Save.data.victories));
     const cp = Save.data.checkpoint;
     setText(el('hs-progress'), cp ? 'Stage ' + cp.stage + ' · ' + fmt(cp.score) + ' pts' : 'None');
+    setText(el('hs-endings'), endingsFound() + ' / 3');
     const note = el('hs-note');
     if (note) {
       note.textContent = Save.available
@@ -6286,6 +7390,11 @@
     Game.clearedStages = 0;
     Game.damageTakenTotal = 0;
     Game.damageSources = {};
+    resetProgression();
+    ally.active = false;
+    allyShots.length = 0;
+    upgradeOpen = false;
+    choiceActive = false;
     Game.combo = 0;
     Game.comboTimer = 0;
     Game.mult = 1;
@@ -6367,6 +7476,12 @@
     if (rings.length > 6) rings.length = 0;
     resetPlayer(true);
     player.awake = Game.awakened;
+    if (run.allies && Game.stage >= 2) {
+      grantAlly();
+    } else {
+      ally.active = false;
+      allyShots.length = 0;
+    }
     Game.state = 'STAGE_TRANSITION';
     Game.transitionT = 2.7;
     const cfg = CONFIG.stages[Game.stage];
@@ -6391,10 +7506,27 @@
     const skip = Game.skipIntroOnce;
     Game.skipIntroOnce = false;
     const intro = LINES['stage' + Game.stage + 'Intro'];
+    const choiceKey = Game.stage === 1 ? 'path' : (Game.stage === 2 ? 'allies' : null);
+    const leaveClassroom = function () {
+      if (Game.classroomScene) {
+        Game.classroomScene = false;
+        buildStaticBackground(Game.stage);
+      }
+    };
+    const afterIntro = function () {
+      leaveClassroom();
+      if (choiceKey && !skip) {
+        showChoice(choiceKey, beginCombat);
+      } else {
+        beginCombat();
+      }
+    };
     if (intro && !skip) {
-      Dialogue.start(intro, beginCombat);
+      Game.classroomScene = (Game.stage === 1);
+      if (Game.classroomScene) buildStaticBackground(0);
+      Dialogue.start(intro, afterIntro);
     } else {
-      beginCombat();
+      afterIntro();
     }
   }
 
@@ -6405,6 +7537,10 @@
   }
 
   function beginCombat() {
+    if (Game.classroomScene) {
+      Game.classroomScene = false;
+      buildStaticBackground(Game.stage);
+    }
     blurFocus();
     Game.state = 'PLAYING';
     stage.started = true;
@@ -6414,6 +7550,7 @@
     clearHeld();
     player.invuln = Math.max(player.invuln, 0.8);
     updateTouchVisibility();
+    if (run.pendingLevels > 0) tryOpenUpgrade();
     if (Game.stage === 1) {
       showToast('THE AWAKENING', 'Survive the courtyard. Strike with J, shoot with K.', 3.4);
       if (!Game.tutorialShown) showTutorial();
@@ -6465,6 +7602,7 @@
     const flawless = stage.damageTaken <= 0.5;
     const bonus = Math.round(CONFIG.scoring.stageClear * Game.stage + (flawless ? CONFIG.scoring.noDamageStage : 0));
     Game.score += bonus;
+    gainXp(CONFIG.xp.stageBonus);
     Game.clearedStages = Math.max(Game.clearedStages, Game.stage);
     eShots.length = 0;
     hazards.length = 0;
@@ -6493,6 +7631,7 @@
 
   function pauseGame() {
     if (Game.state !== 'PLAYING') return;
+    hideChoiceOverlay();
     Game.state = 'PAUSED';
     clearHeld();
     clearPressed();
@@ -6530,12 +7669,23 @@
 
   function backToTitle() {
     hideAllScreens();
+    hideChoiceOverlay();
+    Game.classroomScene = false;
     resetRun();
     buildStaticBackground(1);
     showTitleScreen();
     updateTouchVisibility();
     Game.slowmo = 1;
     Game.hitStop = 0;
+  }
+
+  function endingsFound() {
+    const e = Save.data.endings || {};
+    let n = 0;
+    if (e.seal) n++;
+    if (e.sovereign) n++;
+    if (e.dawn) n++;
+    return n;
   }
 
   function worstDamageSource() {
@@ -6553,6 +7703,7 @@
 
   function showGameOver() {
     if (Game.state === 'GAME_OVER') return;
+    hideChoiceOverlay();
     Game.state = 'GAME_OVER';
     clearHeld();
     clearPressed();
@@ -6586,6 +7737,7 @@
 
   function showVictory(isBest) {
     Game.state = 'VICTORY';
+    hideChoiceOverlay();
     clearHeld();
     clearPressed();
     Game.slowmo = 1;
@@ -6610,7 +7762,19 @@
     }
     Save.data.kills = Math.max(Save.data.kills, Game.kills);
     Save.data.stagesCleared = 3;
+    if (run.ending) {
+      Save.data.endings = Save.data.endings || {};
+      Save.data.endings[run.ending] = true;
+    }
     Save.persist();
+    const ending = ENDINGS[run.ending] || ENDINGS.seal;
+    setText(el('ending-title'), ending.title);
+    setText(el('ending-text'), ending.text + ' ' + ending.epilogue);
+    setText(el('ending-meta'),
+      'PATH: ' + (run.path === 'scholar' ? 'SCHOLAR' : run.path === 'guardian' ? 'GUARDIAN' : 'UNCHOSEN') +
+      ' · ' + (run.allies ? 'STOOD WITH ALLIES' : 'WALKED ALONE') +
+      ' · RESOLVE: ' + (run.resolve === 'power' ? 'TOOK THE POWER' : run.resolve === 'faith' ? 'KEPT FAITH' : 'UNKNOWN') +
+      ' · ENDINGS FOUND: ' + endingsFound() + ' / 3');
     const badges = el('vic-badges');
     if (badges) {
       badges.innerHTML =
@@ -6746,6 +7910,8 @@
     updateEnemies(sdt);
     updateBoss(sdt);
     if (Game.state !== 'PLAYING') return;
+    updateAlly(sdt);
+    updateAllyShots(sdt);
     updateProjectiles(sdt);
     updateHazards(sdt);
     updatePickups(sdt);
@@ -6780,6 +7946,14 @@
       f.vy += 55 * dt;
       if (f.life <= 0) floaters.splice(i, 1);
     }
+  }
+
+  function handleUpgradeKey(index) {
+    const list = el('upgrade-list');
+    if (!list || !list.children || !list.children[index]) return;
+    const node = list.children[index];
+    const id = node.getAttribute && node.getAttribute('data-upgrade');
+    if (id) chooseUpgrade(id);
   }
 
   function beginBossFight() {
@@ -6830,7 +8004,8 @@
     else Game.flash = 0;
 
     const frozen = Game.state === 'PAUSED' || Game.state === 'DIALOGUE' || Game.state === 'STAGE_TRANSITION' ||
-      Game.state === 'BOSS_INTRO' || Game.state === 'GAME_OVER' || Game.state === 'VICTORY';
+      Game.state === 'BOSS_INTRO' || Game.state === 'GAME_OVER' || Game.state === 'VICTORY' ||
+      Game.state === 'UPGRADE' || Game.state === 'CHOICE';
     if (!frozen) updateVisuals(dt);
 
     if (Dialogue.active) Dialogue.update(dt);
@@ -6874,7 +8049,7 @@
     } else {
       ctx.translate(Game.shakeX, Game.shakeY);
       drawBackground();
-      drawWorld();
+      if (!Game.classroomScene) drawWorld();
       drawScreenOverlays();
     }
     ctx.restore();
@@ -7045,6 +8220,16 @@
         showToast: showToast,
         updateHUD: updateHUD,
         getParticles: function () { return particles; },
+        run: run,
+        ally: ally,
+        gainXp: gainXp,
+        recomputeModifiers: recomputeModifiers,
+        showChoice: showChoice,
+        pickChoice: pickChoice,
+        chooseUpgrade: chooseUpgrade,
+        openUpgradeScreen: openUpgradeScreen,
+        doHeal: doHeal,
+        CROSSROADS: CROSSROADS,
         getView: getView,
         layout: layout,
         getRings: function () { return rings; },
@@ -7053,6 +8238,7 @@
         render: render,
         getBoss: function () { return boss; },
         getEnemies: function () { return enemies; },
+        getAllyShots: function () { return allyShots; },
         getHazards: function () { return hazards; },
         getPickups: function () { return pickups; },
         setState: function (s) { Game.state = s; }
