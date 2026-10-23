@@ -1479,9 +1479,11 @@ func _shot_mode(mode: String) -> void:
 		await _save_shot("res://build/shot_stage3.jpg")
 	else:
 		for i in 3:
-			_spawn_enemy("grunt" if i < 2 else "stalker", Vector3(-3.4 + float(i) * 3.4, 0.0, -2.2 + float(i) * 1.2))
+			_spawn_enemy("grunt" if i < 2 else "stalker", Vector3(-2.7 + float(i) * 2.7, 0.0, -3.4 - float(i) * 0.7))
 		effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
 		effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.12, 2.4)
+		effects.slash(player.body_center() + Vector3(0.0, 0.1, -0.6), Vector3(0.0, 0.0, -1.0),
+			Color(0.45, 0.9, 1.0), 2.2, true, false)
 		await get_tree().create_timer(2.0).timeout
 		var f2: Vector2 = camera_rig.camera.unproject_position(player.global_position)
 		var h2: Vector2 = camera_rig.camera.unproject_position(
@@ -1512,6 +1514,10 @@ func _save_shot(path: String) -> void:
 	print("SHOT viewport=%s window=%s" % [str(get_viewport().get_visible_rect()), str(DisplayServer.window_get_size())])
 	var absolute: String = ProjectSettings.globalize_path(path)
 	DirAccess.make_dir_recursive_absolute(absolute.get_base_dir())
+	var hero_path: String = absolute.replace(".jpg", "_hero.jpg")
+	var hero: Image = image.duplicate() as Image
+	hero.resize(560, 315, Image.INTERPOLATE_BILINEAR)
+	hero.save_jpg(hero_path, 0.45)
 	var zoom_path: String = absolute.replace(".jpg", "_zoom.jpg")
 	var zoom: Image = image.get_region(Rect2i(420, 236, 520, 390))
 	zoom.resize(430, 322, Image.INTERPOLATE_BILINEAR)

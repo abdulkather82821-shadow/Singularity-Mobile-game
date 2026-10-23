@@ -131,11 +131,11 @@ jobs:
       - name: Inline the stills
         run: |
           set +e
-          for name in stage1_zoom; do
+          for name in stage1_hero; do
             F="build/shot_$name.jpg"
             [ -f "$F" ] || { echo "::warning::no $name screenshot rendered"; continue; }
             echo "::notice::IMAGE $name bytes=$(stat -c%s "$F")"
-            base64 -w0 "$F" | fold -w 3400 | awk -v n="$name" '{ print "::notice::CHUNK " n " " $0 }'
+            base64 -w0 "$F" | fold -w 3300 | awk -v n="$name" '{ print "::notice::CHUNK " n " " $0 }'
           done
 
   windows:
