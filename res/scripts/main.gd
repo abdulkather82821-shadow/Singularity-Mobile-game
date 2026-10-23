@@ -312,6 +312,7 @@ func _start_combat() -> void:
 	hud.set_gameplay_visible(true)
 	touch.set_visible_controls(bool(SaveManager.settings.get("touch", true)))
 	camera_rig.set_target(player)
+	camera_rig.cancel_orbit()
 	camera_rig.snap_to_target()
 	AudioManager.play_music(_stage_theme())
 	var hint: String = "WASD move  ·  J attack  ·  K shot  ·  L special  ·  SHIFT dash  ·  1/2/3 class  ·  Q ultimate"
@@ -1498,9 +1499,9 @@ func _shot_mode(mode: String) -> void:
 			player.global_position + Vector3(0.0, player.rig.height, 0.0))
 		var r_up: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, 0.9, 0.0))
 		var r_dn: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, -0.9, 0.0))
-		print("SHOT live feet=%s head=%s player_px=%.0f ruler_px=%.0f rig_scale=%s player_scale=%s cam_dist=%.2f" % [
+		print("SHOT live feet=%s head=%s player_px=%.0f ruler_px=%.0f cam=%s dist=%.2f" % [
 			str(f2), str(h2), absf(f2.y - h2.y), absf(r_up.y - r_dn.y),
-			str(player.rig.scale), str(player.scale),
+			str(camera_rig.camera.global_position),
 			player.global_position.distance_to(camera_rig.camera.global_position)
 		])
 		await _save_shot("res://build/shot_stage1.jpg")

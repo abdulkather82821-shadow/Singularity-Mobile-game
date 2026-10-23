@@ -61,6 +61,11 @@ func orbit(center: Vector3, duration: float, radius_value: float = 13.0) -> void
 	_orbit_radius = radius_value
 
 
+func cancel_orbit() -> void:
+	_orbit_time = 0.0
+	_orbit_duration = 0.0
+
+
 func add_shake(amount: float) -> void:
 	_shake = clampf(_shake + amount, 0.0, 1.6)
 
