@@ -451,8 +451,7 @@ func _open_choice(key: String, next_action: Callable) -> void:
 			player.configure(run.modifiers)
 		last_note = note
 		print("AUTOPLAY: crossroad %s -> %s" % [key, note])
-		if next_action.is_valid():
-			next_action.call()
+		_invoke_choice(next_action, key, 0)
 		return
 	state = "choice"
 	get_tree().paused = true
@@ -469,9 +468,17 @@ func _open_choice(key: String, next_action: Callable) -> void:
 		menus.hide_all()
 		last_note = note
 		hud.notify("CROSSROADS SET", note, 3.0)
-		if next_action.is_valid():
-			next_action.call()
+		_invoke_choice(next_action, chosen_key, index)
 	)
+
+
+func _invoke_choice(action: Callable, key: String, index: int) -> void:
+	if not action.is_valid():
+		return
+	if action.get_argument_count() >= 2:
+		action.call(key, index)
+	else:
+		action.call()
 
 
 func _after_stage_crossroad() -> void:
