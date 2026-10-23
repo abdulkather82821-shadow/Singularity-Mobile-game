@@ -161,6 +161,8 @@ func _build_hair() -> void:
 	var style: String = String(palette["hair_style"])
 	part(hair, SphereMesh.new(), _mat(palette["hair"]), Vector3(0.0, 0.15, -0.03), Vector3.ZERO, Vector3(0.35, 0.33, 0.35))
 	part(hair, BoxMesh.new(), _mat(palette["hair"]), Vector3(0.0, 0.2, 0.12), Vector3(0.24, 0.0, 0.0), Vector3(0.28, 0.12, 0.14))
+	part(hair, BoxMesh.new(), _mat(palette["hair"].lightened(0.18)), Vector3(0.0, 0.3, 0.06), Vector3(0.0, 0.0, 0.06), Vector3(0.2, 0.1, 0.2))
+	part(hair, BoxMesh.new(), _mat(palette["hair"]), Vector3(0.0, -0.02, -0.16), Vector3.ZERO, Vector3(0.26, 0.3, 0.1))
 	if style == "long":
 		part(hair, BoxMesh.new(), _mat(palette["hair"]), Vector3(0.0, -0.16, -0.11), Vector3.ZERO, Vector3(0.34, 0.66, 0.14))
 		part(hair, BoxMesh.new(), _mat(palette["hair"]), Vector3(-0.16, -0.02, 0.02), Vector3.ZERO, Vector3(0.09, 0.52, 0.16))

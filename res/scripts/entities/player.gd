@@ -73,11 +73,11 @@ func _rebuild_rig() -> void:
 	rig.name = "Rig"
 	rig.build({
 		"skin": Color(0.99, 0.84, 0.72),
-		"hair": Color(0.09, 0.08, 0.13),
-		"coat": class_data.get("coat", Color(0.14, 0.16, 0.26)),
-		"trim": class_data.get("trim", Color(0.42, 0.62, 0.92)),
-		"shirt": Color(0.78, 0.83, 0.96),
-		"pants": Color(0.12, 0.13, 0.2),
+		"hair": Color(0.07, 0.06, 0.11),
+		"coat": class_data.get("coat", Color(0.11, 0.13, 0.27)),
+		"trim": class_data.get("trim", Color(0.3, 0.78, 1.0)),
+		"shirt": Color(0.88, 0.91, 0.99),
+		"pants": Color(0.09, 0.1, 0.17),
 		"eye": class_data.get("color", Color(0.42, 0.86, 1.0)),
 		"core": class_data.get("color", Color(0.42, 0.86, 1.0)),
 		"cape": Color(0.1, 0.11, 0.18),
