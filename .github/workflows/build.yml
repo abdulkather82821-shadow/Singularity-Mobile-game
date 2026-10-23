@@ -97,11 +97,14 @@ jobs:
             keytool -genkeypair -keystore "$KEYSTORE" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
             echo "keytool_exit=$?"
             ls -l "$KEYSTORE"
-            python3 tools/ci_patch_android_preset.py "$KEYSTORE"
-            echo "patch_exit=$?"
-            grep -E "^keystore/" export_presets.cfg
+            sed -i "s|^keystore/debug=.*|keystore/debug=\"$KEYSTORE\"|" export_presets.cfg
+            echo "sed_exit=$?"
+            sed -i 's|^keystore/debug_user=.*|keystore/debug_user="androiddebugkey"|' export_presets.cfg
+            sed -i 's|^keystore/debug_password=.*|keystore/debug_password="android"|' export_presets.cfg
+            grep -nE "^keystore/" export_presets.cfg
+            echo "grep_exit=$?"
           } > "$LOG" 2>&1
-          tail -c 2500 "$LOG" | sed 's/%/%25/g' | while IFS= read -r line; do echo "::error::$line"; done
+          tail -c 2000 "$LOG" | tac | sed 's/%/%25/g' | head -n 10 | while IFS= read -r line; do echo "::error::$line"; done
           grep -q '^keystore/debug="/' export_presets.cfg
 
       - name: Export Android build
