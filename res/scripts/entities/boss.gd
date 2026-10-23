@@ -111,6 +111,13 @@ func _build() -> void:
 	add_child(_aura)
 
 
+func skip_intro() -> void:
+	_intro = 0.0
+	state = "idle"
+	_state_timer = 0.6
+	position.y = 0.55
+
+
 func is_targetable() -> bool:
 	return state != "intro" and state != "dying" and hp > 0.0
 

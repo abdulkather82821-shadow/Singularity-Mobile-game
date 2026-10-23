@@ -63,6 +63,8 @@ for path in gd_files + ["project.godot"] + scene_files + ["export_presets.cfg"]:
     text = read(path)
     for match in re.finditer(r"res://([A-Za-z0-9_./-]+)", text):
         target = match.group(1)
+        if target.startswith("build/"):
+            continue
         if not os.path.exists(target):
             errors.append(f"{path}: missing resource res://{target}")
 

@@ -57,6 +57,60 @@ jobs:
           fi
           grep -q "AUTOPLAY_RESULT" "$RUNNER_TEMP/play.log" || { echo "::error::the unattended run never finished"; exit 1; }
 
+  shots:
+    name: Rendered screenshots
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            mv /root/.local/share/godot/export_templates/* ~/.local/share/godot/export_templates/ || true
+          fi
+
+      - name: Install a virtual display
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            apt-get update && apt-get install -y --no-install-recommends xvfb libgl1-mesa-dri libglx-mesa0
+          fi
+          command -v xvfb-run
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Render stills
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p build
+          set +e
+          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --resolution 1280x720 --rendering-driver opengl3 --audio-driver Dummy -- --shot > "$RUNNER_TEMP/shot.log" 2>&1
+          CODE=$?
+          echo "shot_exit=$CODE"
+          grep -E "SHOT|ERROR|SCRIPT" "$RUNNER_TEMP/shot.log" | head -n 20 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$(echo "$line" | cut -c1-300)"; done
+          ls -l build 2>/dev/null
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SINGULARITY-screenshots
+          path: build/*.jpg
+          if-no-files-found: warn
+
+      - name: Inline the boss still
+        run: |
+          F=build/shot_stage3.jpg
+          [ -f "$F" ] || { echo "::warning::no boss screenshot rendered"; exit 0; }
+          echo "::notice::IMAGE bytes=$(stat -c%s "$F")"
+          base64 -w0 "$F" | fold -w 5000 | awk '{ print "::notice::CHUNK " $0 }'
+
   windows:
     name: Windows .exe
     needs: smoke

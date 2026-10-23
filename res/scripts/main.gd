@@ -75,6 +75,8 @@ func _ready() -> void:
 	SaveManager.settings_changed.connect(_apply_settings)
 	back_to_title()
 	autoplay = OS.get_cmdline_user_args().has("--autoplay")
+	if OS.get_cmdline_user_args().has("--shot"):
+		_shot_mode()
 	if autoplay:
 		_autoplay_started = Time.get_ticks_msec()
 		print("AUTOPLAY: unattended 3D run starting")
@@ -1435,3 +1437,59 @@ func _autoplay_end(reason: String) -> void:
 	get_tree().paused = false
 	Engine.time_scale = 1.0
 	get_tree().quit(0)
+
+
+# ------------------------------------------------------------------ photo mode
+## `godot --path . -- --shot` renders three stills (title, campus fight, boss)
+## so the CI job can publish what the 3D build actually looks like.
+func _shot_mode() -> void:
+	await get_tree().process_frame
+	await get_tree().create_timer(0.6).timeout
+	await _save_shot("res://build/shot_title.jpg")
+	menus.hide_all()
+	stage_index = 1
+	stage_data = GameConfig.stage_data(1)
+	arena.set_stage(1)
+	_prepare_stage()
+	state = "play"
+	get_tree().paused = false
+	hud.set_gameplay_visible(true)
+	camera_rig.set_target(player)
+	camera_rig.snap_to_target()
+	for i in 3:
+		var type_id: String = "grunt" if i < 2 else "stalker"
+		_spawn_enemy(type_id, Vector3(-3.2 + float(i) * 3.2, 0.0, -2.4 + float(i) * 1.1))
+	effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
+	effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.1, 2.4)
+	await get_tree().create_timer(1.8).timeout
+	await _save_shot("res://build/shot_stage1.jpg")
+	_clear_world()
+	stage_index = 3
+	stage_data = GameConfig.stage_data(3)
+	arena.set_stage(3)
+	_prepare_stage()
+	state = "play"
+	get_tree().paused = false
+	camera_rig.set_target(player)
+	camera_rig.snap_to_target()
+	boss_timer = -1.0
+	_spawn_boss()
+	if is_instance_valid(boss):
+		boss.skip_intro()
+	effects.ring(Vector3(0.0, 0.0, -4.0), 1.0, 8.0, Color(1.0, 0.3, 0.55), 0.2, 3.0)
+	await get_tree().create_timer(2.4).timeout
+	await _save_shot("res://build/shot_stage3.jpg")
+	get_tree().quit(0)
+
+
+func _save_shot(path: String) -> void:
+	await RenderingServer.frame_post_draw
+	var image: Image = get_viewport().get_texture().get_image()
+	if image == null:
+		print("SHOT failed: no image")
+		return
+	image.resize(480, 270, Image.INTERPOLATE_BILINEAR)
+	var absolute: String = ProjectSettings.globalize_path(path)
+	DirAccess.make_dir_recursive_absolute(absolute.get_base_dir())
+	var result: int = image.save_jpg(absolute, 0.45)
+	print("SHOT %s err=%d %dx%d" % [absolute, result, image.get_width(), image.get_height()])
