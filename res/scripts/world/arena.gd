@@ -185,16 +185,16 @@ func _bounds(half_x: float, half_z: float, color: Color) -> void:
 
 # ------------------------------------------------------------------ stage 1
 func _build_campus() -> void:
-	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.18, 0.17, 0.165), 0.96)
-	_grid_lines(Color(0.34, 0.35, 0.4), 4.0, 20.0, 13.0)
+	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.105, 0.1, 0.115), 0.96)
+	_grid_lines(Color(0.3, 0.32, 0.4), 4.0, 20.0, 13.0)
 	_bounds(20.0, 13.0, Color(0.22, 0.26, 0.34))
 	_apply_environment(Color(0.16, 0.2, 0.38), Color(0.95, 0.55, 0.38), Color(0.62, 0.66, 0.85), 0.012)
 	if is_instance_valid(sun):
 		sun.rotation_degrees = Vector3(-32.0, -38.0, 0.0)
 		sun.light_color = Color(1.0, 0.74, 0.52)
-		sun.light_energy = 1.7
+		sun.light_energy = 1.25
 		sun.shadow_bias = 0.04
-	var wall: StandardMaterial3D = _mat(Color(0.2, 0.18, 0.24), 0.0, 0.85)
+	var wall: StandardMaterial3D = _mat(Color(0.115, 0.105, 0.145), 0.0, 0.85)
 	var window: StandardMaterial3D = _mat(Color(1.0, 0.82, 0.5), 1.6, 0.4)
 	for i in 3:
 		var height: float = 7.0 + float(i) * 2.4
@@ -334,9 +334,9 @@ func _apply_environment(top: Color, horizon: Color, fog_color: Color, fog_densit
 	environment.background_energy_multiplier = 0.9
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.3, 0.34, 0.5).lerp(fog_color, 0.3)
-	environment.ambient_light_energy = 0.42
+	environment.ambient_light_energy = 0.34
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
-	environment.tonemap_exposure = 1.02
+	environment.tonemap_exposure = 0.88
 	environment.tonemap_white = 6.0
 	environment.fog_enabled = true
 	environment.fog_light_color = fog_color

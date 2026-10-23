@@ -55,7 +55,7 @@ directional_shadow_max_distance = 60.0
 [node name="Rim" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-14, 148, 0)
 light_color = Color(0.56, 0.7, 1, 1)
-light_energy = 0.45
+light_energy = 0.28
 light_specular = 0.2
 
 [node name="Arena" parent="." instance=ExtResource("2_arena")]
