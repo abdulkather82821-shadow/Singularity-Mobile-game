@@ -1462,6 +1462,7 @@ func _shot_mode(mode: String) -> void:
 	player.position = Vector3(0.0, 0.0, 1.2)
 	player.facing = Vector3(0.0, 0.0, -1.0)
 	camera_rig.set_target(player)
+	camera_rig.cancel_orbit()
 	camera_rig.snap_to_target()
 	var feet: Vector2 = camera_rig.camera.unproject_position(player.global_position)
 	var head: Vector2 = camera_rig.camera.unproject_position(
