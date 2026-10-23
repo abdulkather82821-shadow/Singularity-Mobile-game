@@ -75,8 +75,9 @@ func _ready() -> void:
 	SaveManager.settings_changed.connect(_apply_settings)
 	back_to_title()
 	autoplay = OS.get_cmdline_user_args().has("--autoplay")
-	if OS.get_cmdline_user_args().has("--shot"):
-		_shot_mode()
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shot"):
+			_shot_mode(arg.get_slice("=", 1) if arg.contains("=") else "all")
 	if autoplay:
 		_autoplay_started = Time.get_ticks_msec()
 		print("AUTOPLAY: unattended 3D run starting")
@@ -1442,44 +1443,48 @@ func _autoplay_end(reason: String) -> void:
 # ------------------------------------------------------------------ photo mode
 ## `godot --path . -- --shot` renders three stills (title, campus fight, boss)
 ## so the CI job can publish what the 3D build actually looks like.
-func _shot_mode() -> void:
+func _shot_mode(mode: String) -> void:
 	await get_tree().process_frame
-	await get_tree().create_timer(0.6).timeout
-	await _save_shot("res://build/shot_title.jpg")
+	await get_tree().create_timer(0.8).timeout
+	if mode == "title" or mode == "all":
+		await _save_shot("res://build/shot_title.jpg")
+		if mode != "all":
+			get_tree().quit(0)
+			return
 	menus.hide_all()
-	stage_index = 1
-	stage_data = GameConfig.stage_data(1)
-	arena.set_stage(1)
-	_prepare_stage()
-	state = "play"
-	get_tree().paused = false
 	hud.set_gameplay_visible(true)
-	camera_rig.set_target(player)
-	camera_rig.snap_to_target()
-	for i in 3:
-		var type_id: String = "grunt" if i < 2 else "stalker"
-		_spawn_enemy(type_id, Vector3(-3.2 + float(i) * 3.2, 0.0, -2.4 + float(i) * 1.1))
-	effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
-	effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.1, 2.4)
-	await get_tree().create_timer(1.8).timeout
-	await _save_shot("res://build/shot_stage1.jpg")
-	_clear_world()
-	stage_index = 3
-	stage_data = GameConfig.stage_data(3)
-	arena.set_stage(3)
-	_prepare_stage()
-	state = "play"
+	staged_shot(mode)
+	await get_tree().process_frame
+	await get_tree().process_frame
 	get_tree().paused = false
+	state = "play"
 	camera_rig.set_target(player)
 	camera_rig.snap_to_target()
-	boss_timer = -1.0
-	_spawn_boss()
-	if is_instance_valid(boss):
-		boss.skip_intro()
-	effects.ring(Vector3(0.0, 0.0, -4.0), 1.0, 8.0, Color(1.0, 0.3, 0.55), 0.2, 3.0)
-	await get_tree().create_timer(2.4).timeout
-	await _save_shot("res://build/shot_stage3.jpg")
+	if mode == "boss":
+		boss_timer = -1.0
+		_spawn_boss()
+		if is_instance_valid(boss):
+			boss.skip_intro()
+			boss.player_pos = player.position
+		effects.ring(Vector3(0.0, 0.2, -4.0), 1.0, 9.0, Color(1.0, 0.3, 0.55), 0.25, 3.2)
+		await get_tree().create_timer(2.6).timeout
+		await _save_shot("res://build/shot_stage3.jpg")
+	else:
+		for i in 3:
+			_spawn_enemy("grunt" if i < 2 else "stalker", Vector3(-3.4 + float(i) * 3.4, 0.0, -2.2 + float(i) * 1.2))
+		effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
+		effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.12, 2.4)
+		await get_tree().create_timer(2.0).timeout
+		await _save_shot("res://build/shot_stage1.jpg")
 	get_tree().quit(0)
+
+
+## Builds one stage for the screenshot job.
+func staged_shot(mode: String) -> void:
+	stage_index = 3 if mode == "boss" else 1
+	stage_data = GameConfig.stage_data(stage_index)
+	arena.set_stage(stage_index)
+	_prepare_stage()
 
 
 func _save_shot(path: String) -> void:

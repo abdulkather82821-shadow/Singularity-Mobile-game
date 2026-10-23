@@ -91,11 +91,16 @@ jobs:
         run: |
           mkdir -p build
           set +e
-          timeout 300 xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --resolution 1280x720 --rendering-driver opengl3 --audio-driver Dummy -- --shot > "$RUNNER_TEMP/shot.log" 2>&1
-          CODE=$?
-          echo "shot_exit=$CODE"
-          grep -E "SHOT|ERROR|SCRIPT" "$RUNNER_TEMP/shot.log" | head -n 20 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$(echo "$line" | cut -c1-300)"; done
-          ls -l build 2>/dev/null
+          for mode in title campus boss; do
+            echo "=== $mode"
+            timeout 200 xvfb-run -a -s "-screen 0 1280x720x24" \
+              godot --path . --resolution 1280x720 --rendering-driver opengl3 \
+              --audio-driver Dummy -- --shot=$mode > "$RUNNER_TEMP/shot_$mode.log" 2>&1
+            echo "exit_$mode=$?"
+            grep -E "SHOT" "$RUNNER_TEMP/shot_$mode.log" | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$(echo "$line" | cut -c1-300)"; done
+            grep -E "SCRIPT ERROR|Invalid|Nil" "$RUNNER_TEMP/shot_$mode.log" | head -n 4 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::warning::$(echo "$line" | cut -c1-300)"; done
+          done
+          ls -l build || true
           exit 0
 
       - uses: actions/upload-artifact@v4

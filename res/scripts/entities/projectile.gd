@@ -80,7 +80,8 @@ func _build() -> void:
 		light.light_energy = 1.1
 		light.omni_range = 3.0
 		add_child(light)
-	_core.look_at(global_position + dir * 2.0, Vector3.UP)
+	if _core.is_inside_tree():
+		_core.look_at(global_position + dir * 2.0, Vector3.UP)
 
 
 func _process(delta: float) -> void:
