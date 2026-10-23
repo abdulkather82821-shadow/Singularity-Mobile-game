@@ -1465,11 +1465,7 @@ func _shot_mode(mode: String) -> void:
 	var feet: Vector2 = camera_rig.camera.unproject_position(player.global_position)
 	var head: Vector2 = camera_rig.camera.unproject_position(
 		player.global_position + Vector3(0.0, player.rig.height, 0.0))
-	print("SHOT player=%s rig_children=%d rig_h=%.2f cam=%s fov=%.1f feet=%s head=%s px=%.0f" % [
-		str(player.global_position), player.rig.get_child_count(), player.rig.height,
-		str(camera_rig.camera.global_position), camera_rig.camera.fov,
-		str(feet), str(head), absf(feet.y - head.y)
-	])
+
 	if mode == "boss":
 		boss_timer = -1.0
 		_spawn_boss()
@@ -1484,7 +1480,29 @@ func _shot_mode(mode: String) -> void:
 			_spawn_enemy("grunt" if i < 2 else "stalker", Vector3(-3.4 + float(i) * 3.4, 0.0, -2.2 + float(i) * 1.2))
 		effects.burst(player.body_center(), Color(0.5, 0.85, 1.0), 40, 6.0, 0.9, 0.1, 1.0)
 		effects.ring(player.position, 0.6, 4.0, Color(0.45, 0.85, 1.0), 0.12, 2.4)
+		var ruler := MeshInstance3D.new()
+		var ruler_mesh := BoxMesh.new()
+		ruler_mesh.size = Vector3(0.55, 1.8, 0.55)
+		ruler.mesh = ruler_mesh
+		var ruler_mat := StandardMaterial3D.new()
+		ruler_mat.albedo_color = Color(1.0, 1.0, 1.0)
+		ruler_mat.emission_enabled = true
+		ruler_mat.emission = Color(1.0, 0.9, 0.4)
+		ruler_mat.emission_energy_multiplier = 0.6
+		ruler.material_override = ruler_mat
+		ruler.position = player.position + Vector3(2.2, 0.9, 0.0)
+		actors.add_child(ruler)
 		await get_tree().create_timer(2.0).timeout
+		var f2: Vector2 = camera_rig.camera.unproject_position(player.global_position)
+		var h2: Vector2 = camera_rig.camera.unproject_position(
+			player.global_position + Vector3(0.0, player.rig.height, 0.0))
+		var r_up: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, 0.9, 0.0))
+		var r_dn: Vector2 = camera_rig.camera.unproject_position(ruler.global_position + Vector3(0.0, -0.9, 0.0))
+		print("SHOT live feet=%s head=%s player_px=%.0f ruler_px=%.0f rig_scale=%s player_scale=%s cam_dist=%.2f" % [
+			str(f2), str(h2), absf(f2.y - h2.y), absf(r_up.y - r_dn.y),
+			str(player.rig.scale), str(player.scale),
+			player.global_position.distance_to(camera_rig.camera.global_position)
+		])
 		await _save_shot("res://build/shot_stage1.jpg")
 	get_tree().quit(0)
 
@@ -1510,6 +1528,7 @@ func _save_shot(path: String) -> void:
 	var zoom: Image = image.get_region(Rect2i(420, 236, 520, 390))
 	zoom.resize(430, 322, Image.INTERPOLATE_BILINEAR)
 	zoom.save_jpg(zoom_path, 0.55)
+	print("SHOT image_size=%s viewport=%s" % [str(image.get_size()), str(get_viewport().get_visible_rect().size)])
 	var sample: Color = image.get_pixel(640, 600)
 	print("SHOT floor_pixel=%s zoom=%s" % [str(sample), zoom_path])
 	image.resize(480, 270, Image.INTERPOLATE_BILINEAR)
