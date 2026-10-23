@@ -185,8 +185,8 @@ func _bounds(half_x: float, half_z: float, color: Color) -> void:
 
 # ------------------------------------------------------------------ stage 1
 func _build_campus() -> void:
-	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.14, 0.15, 0.19), 0.96)
-	_grid_lines(Color(0.28, 0.34, 0.46), 4.0, 20.0, 13.0)
+	_ground_plane(Vector3(48.0, 0.0, 34.0), Color(0.18, 0.17, 0.165), 0.96)
+	_grid_lines(Color(0.34, 0.35, 0.4), 4.0, 20.0, 13.0)
 	_bounds(20.0, 13.0, Color(0.22, 0.26, 0.34))
 	_apply_environment(Color(0.16, 0.2, 0.38), Color(0.95, 0.55, 0.38), Color(0.62, 0.66, 0.85), 0.012)
 	if is_instance_valid(sun):
@@ -206,8 +206,8 @@ func _build_campus() -> void:
 		var height: float = 8.0 + float(i) * 2.0
 		_box(Vector3(6.0, height, 5.0), Vector3(22.0, height * 0.5, -12.0 + float(i) * 12.0), wall)
 		_box(Vector3(4.6, 0.5, 0.1), Vector3(18.9, 3.0 + float(i) * 2.0, -12.0 + float(i) * 12.0), window, Vector3.ZERO)
-	_label("PMIST", Vector3(0.0, 6.2, -18.2), 220, Color(1.0, 0.86, 0.62))
-	_label("CAMPUS COURTYARD", Vector3(0.0, 4.6, -18.2), 90, Color(0.72, 0.82, 1.0))
+	_label("PMIST", Vector3(0.0, 5.5, -18.2), 120, Color(1.0, 0.86, 0.62))
+	_label("CAMPUS COURTYARD", Vector3(0.0, 4.35, -18.2), 58, Color(0.78, 0.85, 1.0))
 	# lamp posts with warm pools of light
 	for i in 4:
 		var x: float = -15.0 + float(i) * 10.0

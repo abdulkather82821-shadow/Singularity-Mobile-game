@@ -1458,8 +1458,14 @@ func _shot_mode(mode: String) -> void:
 	await get_tree().process_frame
 	get_tree().paused = false
 	state = "play"
+	player.position = Vector3(0.0, 0.0, 1.2)
+	player.facing = Vector3(0.0, 0.0, -1.0)
 	camera_rig.set_target(player)
 	camera_rig.snap_to_target()
+	print("SHOT player=%s rig_children=%d cam=%s" % [
+		str(player.global_position), player.rig.get_child_count(),
+		str(camera_rig.camera.global_position)
+	])
 	if mode == "boss":
 		boss_timer = -1.0
 		_spawn_boss()

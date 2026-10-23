@@ -219,9 +219,9 @@ const ARENA_HALF_X: float = 20.0
 const ARENA_HALF_Z: float = 13.0
 const GROUND_Y: float = 0.0
 
-const CAMERA_OFFSET: Vector3 = Vector3(0.0, 5.4, 10.6)
-const CAMERA_LOOK_HEIGHT: float = 1.75
-const CAMERA_FOV: float = 52.0
+const CAMERA_OFFSET: Vector3 = Vector3(0.0, 3.7, 11.4)
+const CAMERA_LOOK_HEIGHT: float = 1.55
+const CAMERA_FOV: float = 50.0
 const CAMERA_FOLLOW: float = 5.2
 
 const PLAYER_SPEED_3D: float = 6.6

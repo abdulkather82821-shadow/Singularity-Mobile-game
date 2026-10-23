@@ -153,6 +153,8 @@ ENGINE_PROPS = {
     "z_index", "size", "text", "input", "radius", "damage", "kind", "phase", "def", "kills",
     "score", "level", "combo_mult", "stage_time", "damage_taken", "pending_levels", "modifiers",
     "kills_needed", "xp", "shots_fired", "hits_landed", "lines", "index", "flags", "layers",
+    "global_position", "global_transform", "rotation", "rotation_degrees", "scale", "transform",
+    "get_child_count", "is_inside_tree", "queue_free", "look_at", "player_pos",
 }
 
 
