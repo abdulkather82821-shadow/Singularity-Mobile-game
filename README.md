@@ -190,33 +190,83 @@ Difficulty knobs worth knowing: `STAGES[*].hp_mul / speed_mul / damage_mul`,
 
 ---
 
-## 7. Building an Android APK
+## 7. Building the APK and the EXE
 
-`export_presets.cfg` already contains an **Android** preset (`com.singularity.vessel`,
-landscape, arm64). The full path from the deck's page 10:
+The repository contains **source and assets only** — no compiled `.apk` or `.exe` is
+committed, and one cannot be produced inside the sandbox this port was written in
+(the Godot download host is blocked there, and there is no Android SDK or JDK on the
+machine). Below are the three ways to get real binaries.
 
-1. **Install the SDK.** Install Android Studio, then in its SDK Manager add
-   *Android SDK Platform 34*, *Build-Tools* and *Platform-Tools*. Note the SDK path.
-2. **Point Godot at it.** `Editor → Editor Settings → Export → Android`:
-   set `Android SDK Path`; for debug exports also set a debug keystore
-   (`~/.android/debug.keystore`, alias `androiddebugkey`, password `android`).
-   Godot will show a green tick when the SDK and Java are found.
-3. **Install export templates.** `Editor → Manage Export Templates → Download` for
-   your exact Godot version.
-4. **Open the preset.** `Project → Export… → Android`. Adjust *Package → Unique Name*,
-   *Version*, and the launcher icons; keep `arm64-v8a` checked. Tick *Gradle Build* if
-   you need custom Android plugins (requires *Install Android Build Template*).
-5. **Export.** Set the path to `build/android/singularity.apk` and press
-   **Export Project**. `build/` is git-ignored.
-6. **Install on the phone.** `adb install -r build/android/singularity.apk`, or copy
-   the APK across and tap it (allow unknown sources).
+### Option A — build from the command line (recommended)
 
-Notes: the project already locks landscape, uses the GL Compatibility renderer (best
-for mid-range phones) and enables immersive mode in the preset. If your Godot version
-rewrites some preset keys, re-select the values in the export dialog once and save —
+You need:
+
+* **Godot 4.3+** on your `PATH` as `godot` (or set `GODOT=/path/to/godot`)
+* **Export templates** for that exact version:
+  `Editor → Manage Export Templates → Download and Install`
+* For Android: **Android Studio** (SDK 34 + build-tools + platform-tools), a JDK, and
+  both configured in `Editor → Editor Settings → Export → Android`
+
+Then, from the project folder:
+
+```bash
+./tools/export.sh apk     # -> build/android/SINGULARITY.apk  (debug-signed, installable)
+./tools/export.sh exe     # -> build/windows/SINGULARITY.exe  (single file, PCK embedded)
+./tools/export.sh all     # both
+```
+
+The script runs `--import` first, then calls the headless exporter against the two
+presets in `export_presets.cfg` (`Android` and `Windows Desktop`). The Windows binary
+has the game data embedded (`binary_format/embed_pck=true`), so it is one file — copy
+it to any 64-bit Windows machine and run it.
+
+Equivalent raw commands, if you prefer the editor's GUI or your own flags:
+
+```bash
+godot --headless --path . --export-debug   "Android"         build/android/SINGULARITY.apk
+godot --headless --path . --export-release "Windows Desktop" build/windows/SINGULARITY.exe
+```
+
+`build/` is git-ignored. For a **release** APK, switch `--export-debug` to
+`--export-release` and set `keystore/release`, `keystore/release_user` and
+`keystore/release_password` in the Android preset (or in Editor Settings) to your own
+signing key.
+
+### Option B — let GitHub build it (no local install)
+
+`.github/workflows/build.yml` defines two jobs that run inside the
+`barichello/godot-ci:4.3` container and upload the results as downloadable artifacts:
+
+1. Push this branch and open the repo's **Actions** tab.
+2. Pick **Build binaries → Run workflow** (it also runs on pushes to `main`).
+3. When the run finishes, open it and download **SINGULARITY-android** /
+   **SINGULARITY-windows** from the *Artifacts* section.
+
+The Windows job is the low-risk one. The Android job generates a debug keystore and
+points the preset at it; if your repository has Actions disabled, or the container's
+Android SDK paths differ from what Godot expects, that job may need one round of
+adjustment — the job log names the missing setting.
+
+### Option C — the export dialogs
+
+`Project → Export…` shows both presets. Select **Android** (set *Package → Unique
+Name*, version and launcher icons, keep `arm64-v8a`) or **Windows Desktop**, pick an
+output path under `build/`, and press **Export Project**. Same result as Option A.
+
+### Preset defaults
+
+| | Android | Windows Desktop |
+| --- | --- | --- |
+| preset name | `Android` | `Windows Desktop` |
+| output | `build/android/SINGULARITY.apk` | `build/windows/SINGULARITY.exe` |
+| package / arch | `com.singularity.vessel`, arm64-v8a | x86_64 |
+| orientation | landscape, immersive | windowed 1280×720 |
+| data | separate PCK inside the APK | embedded in the EXE |
+
+The project already locks landscape, uses the GL Compatibility renderer (best for
+mid-range phones) and enables immersive mode in the preset. If your Godot version
+rewrites some preset keys, re-select the values once in the export dialog and save —
 the file is plain config, not code.
-
----
 
 ## 8. Verification status — read this before trusting anything
 
@@ -232,6 +282,9 @@ The engine **could not be launched in the environment where this port was writte
   is checked by a static symbol pass.
 * The scenes are **not** instantiated, and no frame has been rendered, in this
   environment. Expect to fix small things the first time you press F5.
+* **No `.apk` or `.exe` is included**, because the Godot editor and the Android SDK
+  were unavailable here. `tools/export.sh` and the GitHub Actions workflow are the
+  prepared paths to produce them; neither has been executed in this environment.
 
 The browser build in `index.html` was verified the hard way (headless runs, a
 scripted bot reaching the victory state, scripted assertions), so the rules, numbers

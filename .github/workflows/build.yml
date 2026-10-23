@@ -1,0 +1,100 @@
+# Builds the Android APK and the Windows executable on GitHub's runners.
+# Start it from the Actions tab ("Run workflow") or push to main.
+# Artifacts appear under the run's "Artifacts" section.
+name: Build binaries
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  windows:
+    name: Windows .exe
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            mv /root/.local/share/godot/export_templates/* ~/.local/share/godot/export_templates/ || true
+          fi
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Export Windows build
+        run: |
+          mkdir -p build/windows
+          godot --headless --path . --export-release "Windows Desktop" build/windows/SINGULARITY.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SINGULARITY-windows
+          path: build/windows/SINGULARITY.exe
+          if-no-files-found: error
+
+  android:
+    name: Android .apk
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install export templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          if [ -d /root/.local/share/godot/export_templates ]; then
+            mv /root/.local/share/godot/export_templates/* ~/.local/share/godot/export_templates/ || true
+          fi
+
+      - name: Import project
+        run: godot --headless --path . --import || true
+
+      - name: Debug keystore
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android -keypass android \
+              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          # Point the preset at the generated keystore (idempotent).
+          python3 - "$HOME/.android/debug.keystore" <<'PY'
+          import sys, pathlib
+          keystore = sys.argv[1]
+          preset = pathlib.Path("export_presets.cfg")
+          text = preset.read_text()
+          for key in ("keystore/debug", "keystore/release"):
+              if f'{key}=""' in text:
+                  text = text.replace(f'{key}=""', f'{key}="{keystore}"', 1)
+          for key in ("keystore/debug_user", "keystore/release_user"):
+              if f'{key}=""' in text:
+                  text = text.replace(f'{key}=""', f'{key}="androiddebugkey"', 1)
+          for key in ("keystore/debug_password", "keystore/release_password"):
+              if f'{key}=""' in text:
+                  text = text.replace(f'{key}=""', f'{key}="android"', 1)
+          preset.write_text(text)
+          PY
+          grep -E "keystore/" export_presets.cfg || true
+
+      - name: Export Android build
+        run: |
+          mkdir -p build/android
+          godot --headless --path . --export-debug "Android" build/android/SINGULARITY.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SINGULARITY-android
+          path: build/android/SINGULARITY.apk
+          if-no-files-found: error
