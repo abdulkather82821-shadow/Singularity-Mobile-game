@@ -57,7 +57,7 @@ func _build() -> void:
 		"hair_style": "long",
 		"cape_on": true,
 		"weapon": "staff",
-		"scale": 1.32
+		"scale": 1.45
 	})
 	add_child(rig)
 	_crown = Node3D.new()

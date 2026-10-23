@@ -131,7 +131,7 @@ jobs:
       - name: Inline the stills
         run: |
           set +e
-          for name in stage1_zoom stage3_zoom; do
+          for name in stage1_zoom; do
             F="build/shot_$name.jpg"
             [ -f "$F" ] || { echo "::warning::no $name screenshot rendered"; continue; }
             echo "::notice::IMAGE $name bytes=$(stat -c%s "$F")"
