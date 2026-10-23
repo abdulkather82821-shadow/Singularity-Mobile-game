@@ -47,7 +47,7 @@ jobs:
       - name: Play the whole campaign unattended
         run: |
           set +e
-          timeout 900 godot --headless --audio-driver Dummy --path . -- --autoplay > "$RUNNER_TEMP/play.log" 2>&1
+          timeout 480 godot --headless --audio-driver Dummy --fixed-fps 60 --path . -- --autoplay > "$RUNNER_TEMP/play.log" 2>&1
           CODE=$?
           echo "play_exit=$CODE"
           grep -E "AUTOPLAY" "$RUNNER_TEMP/play.log" | tail -n 10 | sed 's/%/%25/g' | while IFS= read -r line; do echo "::notice::$(echo "$line" | cut -c1-300)"; done

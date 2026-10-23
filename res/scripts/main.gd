@@ -45,6 +45,7 @@ var _slowmo_until: int = 0
 var _title_clock: float = 0.0
 var _autoplay_clock: float = 0.0
 var _autoplay_logged: float = 0.0
+var _autoplay_started: int = 0
 var _autoplay_class_timer: float = 0.0
 
 @onready var arena: Arena3D = $Arena
@@ -74,6 +75,7 @@ func _ready() -> void:
 	back_to_title()
 	autoplay = OS.get_cmdline_user_args().has("--autoplay")
 	if autoplay:
+		_autoplay_started = Time.get_ticks_msec()
 		print("AUTOPLAY: unattended 3D run starting")
 		new_run()
 
@@ -599,6 +601,8 @@ func _on_ending_chosen(_key: String, index: int) -> void:
 func _process(delta: float) -> void:
 	_release_time_fx()
 	arena.pulse(delta)
+	if autoplay:
+		_autoplay_tick(delta)
 	if get_tree().paused:
 		return
 	match state:
@@ -613,8 +617,6 @@ func _process(delta: float) -> void:
 			if _title_clock > 14.0:
 				_title_clock = 0.0
 				camera_rig.orbit(Vector3(0.0, 1.0, 0.0), 14.0, 17.0)
-	if autoplay:
-		_autoplay_tick(delta)
 
 
 func _tick_play(delta: float) -> void:
@@ -1382,17 +1384,19 @@ func _autoplay_tick(delta: float) -> void:
 	if _autoplay_class_timer > 18.0 and state == "play":
 		_autoplay_class_timer = 0.0
 		cycle_class()
-	if _autoplay_clock - _autoplay_logged > 8.0:
+	if _autoplay_clock - _autoplay_logged > 4.0:
 		_autoplay_logged = _autoplay_clock
 		var hp: float = 0.0
 		var max_hp: float = 0.0
 		if is_instance_valid(player):
 			hp = player.hp
 			max_hp = player.max_hp
-		print("AUTOPLAY t=%.1f state=%s stage=%d class=%s hp=%.0f/%.0f ult=%.0f kills=%d score=%d enemies=%d" % [
-			_autoplay_clock, state, stage_index, run.active_class, hp, max_hp, player.ult_charge if is_instance_valid(player) else 0.0, run.kills, run.score, enemies.size()
+		print("AUTOPLAY t=%.1f state=%s paused=%s ts=%.2f stage=%d class=%s hp=%.0f/%.0f kills=%d score=%d enemies=%d boss=%s" % [
+			_autoplay_clock, state, str(get_tree().paused), Engine.time_scale, stage_index,
+			run.active_class, hp, max_hp, run.kills, run.score, enemies.size(), str(is_instance_valid(boss))
 		])
-	if _autoplay_clock > 600.0:
+	var wall_seconds: float = float(Time.get_ticks_msec() - _autoplay_started) / 1000.0
+	if wall_seconds > 300.0 or _autoplay_clock > 420.0:
 		_autoplay_end("timeout")
 
 
