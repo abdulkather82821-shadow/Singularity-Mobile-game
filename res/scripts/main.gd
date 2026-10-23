@@ -1488,6 +1488,7 @@ func _save_shot(path: String) -> void:
 	if image == null:
 		print("SHOT failed: no image")
 		return
+	print("SHOT viewport=%s window=%s" % [str(get_viewport().get_visible_rect()), str(DisplayServer.window_get_size())])
 	image.resize(480, 270, Image.INTERPOLATE_BILINEAR)
 	var absolute: String = ProjectSettings.globalize_path(path)
 	DirAccess.make_dir_recursive_absolute(absolute.get_base_dir())

@@ -104,12 +104,15 @@ jobs:
           path: build/*.jpg
           if-no-files-found: warn
 
-      - name: Inline the boss still
+      - name: Inline the stills
         run: |
-          F=build/shot_stage3.jpg
-          [ -f "$F" ] || { echo "::warning::no boss screenshot rendered"; exit 0; }
-          echo "::notice::IMAGE bytes=$(stat -c%s "$F")"
-          base64 -w0 "$F" | fold -w 5000 | awk '{ print "::notice::CHUNK " $0 }'
+          set +e
+          for name in title stage1 stage3; do
+            F="build/shot_$name.jpg"
+            [ -f "$F" ] || { echo "::warning::no $name screenshot rendered"; continue; }
+            echo "::notice::IMAGE $name bytes=$(stat -c%s "$F")"
+            base64 -w0 "$F" | fold -w 3500 | awk -v n="$name" '{ print "::notice::CHUNK " n " " $0 }'
+          done
 
   windows:
     name: Windows .exe

@@ -1,323 +1,237 @@
 # SINGULARITY — Vessel of the Fallen
 
-A complete, playable **Godot 4 action-RPG** set at PMIST campus the evening the sky
-cracked open. Three stages, a multi-phase boss, seven upgrades, story crossroads and
-three endings — with every character, backdrop, effect, sound and music loop generated
-procedurally inside this project.
+A **3D anime action-RPG** built in **Godot 4.3** from the design deck: third-person
+combat in a real 3D arena, a cast of procedural low-poly characters, three stages,
+a multi-phase boss and three endings.
 
-> This repository also keeps the earlier **single-file browser build** (`index.html`)
-> as a reference version. The Godot project is the shipping form of the game.
+> "It all started at PMIST. The day the sky cracked."
 
 ---
 
-## 1. Quick start
+## 1. Download the game
 
-1. Install **Godot 4.3 or newer** (standard build, no .NET needed).
-2. Launch Godot → **Import** → pick this folder's `project.godot` → **Import & Edit**.
-3. Press **F5** (or the ▶ Play button). The main scene is `res://res/scenes/main.tscn`.
+Both binaries are built by CI from this branch and attached to the rolling release:
 
-No plugins, no add-ons, no external downloads. The first import generates Godot's
-`.godot/` cache; it is git-ignored and safe to delete.
+| Platform | File | Size | Link |
+|---|---|---|---|
+| Windows (x86-64) | `SINGULARITY.exe` | ~85 MB | <https://github.com/abdulkather82821-shadow/Singularity-Mobile-game/releases/download/latest-build/SINGULARITY.exe> |
+| Android (arm64-v8a) | `SINGULARITY.apk` | ~27 MB | <https://github.com/abdulkather82821-shadow/Singularity-Mobile-game/releases/download/latest-build/SINGULARITY.apk> |
 
-**On a phone:** the same project runs on Android/iOS. Landscape is locked, the
-on-screen thumbstick and buttons appear automatically, and the HUD scales with the
-viewport (`canvas_items` stretch, 1280×720 design resolution).
+Release page: <https://github.com/abdulkather82821-shadow/Singularity-Mobile-game/releases/tag/latest-build>
+Screenshots rendered from the real build are attached to every CI run as the
+`SINGULARITY-screenshots` artifact.
+
+- **Windows:** run the `.exe` directly — the PCK is embedded, no install needed.
+- **Android:** copy the APK to the phone and tap it; allow "install unknown apps"
+  for your file manager. It is debug-signed, offline, and needs Android 6+.
 
 ---
 
 ## 2. Story in one paragraph
 
-The last bell has rung at PMIST when a rift tears the courtyard open. Ajees is pulled
-into the wound in the sky and comes back as its vessel — power that should have
-destroyed him now waits in his hands. Sara, Bala, Manmohan, Gokul and Prince hold the
-line while he fights through the campus, the fractured rift, and finally the glass
-throne of **Katleen**, who opened the door in the first place. Every crossroads you
-take changes the run; the last choice decides which of three endings you earn.
-
-All characters are fictional. The campus is used as a respectful backdrop, not a claim
-about real people or events.
+Ajees is an ordinary PMIST student until the sky splits and Katleen — a dimensional
+invader wearing a crown of glass — starts folding his campus into her realm. Guided
+by Sara, backed by Bala, Manmohan, Gokul and Prince, and carrying a vessel of rift
+power he does not understand, he fights through the courtyard, the fractured rift
+and Katleen's throne. Three crossroads decisions and three endings decide whether he
+seals the rift, rules it, or walks away from it.
 
 ---
 
 ## 3. Controls
 
 | Action | Keyboard / mouse | Touch |
-| --- | --- | --- |
-| Move | `W A S D` / arrow keys | drag anywhere on the left half |
-| Rift blade (3-hit combo) | `J` or left click | **A** |
-| Rift shot | `K` or right click | **B** |
-| Singularity burst | `L` | **S** |
-| Jump | `SPACE` | — |
-| Phase dash (i-frames) | `SHIFT` | **D** |
-| Mend (needs the upgrade) | `H` | **H** |
-| Pause | `ESC` / `P` | **II** button, top right |
+|---|---|---|
+| Move | `W A S D` / arrows | left thumbstick |
+| Melee chain (3 hits) | `J` / left click | **A** |
+| Rift shot | `K` / right click | **B** |
+| Class special | `L` | **S** |
+| Dash (i-frames) | `Shift` | **D** |
+| Jump | `Space` | — |
+| Mend (after upgrade) | `H` | **H** |
+| **Ultimate** (when the meter is full) | `Q` | **U** |
+| **Switch class** | `1` `2` `3`, or `Tab` to cycle | **C** |
+| Pause | `Esc` / `P` | **II** |
 
-Attacks and shots auto-repeat while held, so mashing is optional. Menus are
-mouse/touch driven; `ENTER` starts a run from the title screen and `R` retries after
-a defeat.
+### The power system — three classes, twelve abilities
 
----
+The deck's "melee, magic, ultimate, healing defence" is a real class system. Switch
+mid-run (there is a short settle cooldown) and Ajees's 3D model, weapon and colours
+change with the class:
 
-## 4. What is in the run
+| Class | Melee | Shot | Special | Ultimate |
+|---|---|---|---|---|
+| **VESSEL** (balanced) | 16 / 16 / 27 | 1 bolt, 13 dmg | Singularity Burst — radial | Vessel Unbound — big AoE |
+| **BLADE** (melee) | 20 / 20 / 36, faster | weak quick bolt | Blade Rush — fast, tight burst | Thousand Cuts |
+| **CASTER** (ranged) | 11 / 11 / 17 | 3-bolt spread, 17 dmg | Rift Storm — wide | Singularity Rain |
 
-* **Three stages** — *The Awakening* (PMIST courtyard at dusk), *The Dimensional Rift*
-  (broken campus, burning ground hazards), *Katleen's Realm* (glass throne, boss).
-* **Stage 1** asks for 12 wraiths in 42 s; **stage 2** asks for 16 in 52 s while
-  telegraphed ground hazards rain down. Hitting the quota *or* surviving the clock
-  clears the stage — the score bonus is the same.
-* **Combat:** 15 / 15 / 24 damage combo with a heavy third hit, 13-damage rift shots,
-  a 36-damage radial burst, dash i-frames, knockback, hit-stop, screen shake and
-  floating damage numbers.
-* **Energy:** regenerates 10/s, pays for shots (7), burst (45) and Mend (26). Blue
-  motes from kills refill it.
-* **Combo:** every kill adds 0.5× up to 4× and refreshes a 2.6 s window; taking a hit
-  resets it. Score = kills × combo + damage dealt + orbs + stage bonus.
-* **XP and upgrades:** kills drop orbs; each level opens a three-card choice from
-  seven upgrades (Rift Edge, Vessel Current, Vessel Mend, Phase Step, Second Heart,
-  Singularity Core, Rift Flux). Ranks are capped and exhausted pools fall back to a
-  score bonus instead of a dead screen.
-* **Crossroads:** after stage 1 (Scholar vs Guardian), after stage 2 (Sara joins vs
-  fight alone) and before the throne (faith vs the rift's power). Choices are
-  permanent for the run and change damage, health, healing and the ally.
-* **Sara** auto-fires 11-damage bolts every 2.4 s once she joins.
-* **Katleen:** 1200 HP, intro animation, five moves (fan blast, dash, nova marks,
-  barrage, summons) and a 50 % phase shift that speeds her up, adds shots and grows
-  wings.
-* **Three endings:** *The Vessel's Choice*, *The Sovereign of the Rift* and
-  *A Quiet Morning*, tracked across runs.
-* **Records & settings** persist in `user://save.cfg` (best score, best combo,
-  wraiths, victories, endings found, checkpoint, five toggles).
+Hits charge the **ultimate meter**; kills charge it faster. Level-ups (7 upgrade
+tracks) stack on top: Rift Edge, Vessel Current, Mend, Phase Step, Second Heart,
+Singularity Core and Rift Flux.
 
 ---
 
-## 5. Project layout
+## 4. What is in a run
 
-The structure follows the pitch deck's page 12 outline: one engine config, one scene
-folder, one script folder, and an asset tree.
+- **Stage 1 — The Awakening** (PMIST campus at dusk): 12 wraiths in a 3D courtyard
+  with buildings, lamps, trees and benches.
+- **Stage 2 — The Dimensional Rift**: the campus tears open — floating slabs,
+  monoliths, a rift tear and burning ground hazards.
+- **Stage 3 — Katleen's Realm**: glass throne, pillars, hanging shards. Katleen
+  telegraphs five attacks (blast, dash, nova, barrage, summon) and transforms at
+  half health with a full phase-two dialogue beat.
+- **Story**: dialogue with typewriter pacing, three crossroads (path / allies /
+  resolve) that change damage, health, Mend and Sara, checkpoints between stages,
+  and three endings (`seal`, `sovereign`, `dawn`).
+- **Feel**: hit-stop, slow-motion ultimates, camera shake, bloom, fog, damage
+  numbers, 3D ember bursts, ground rings, slash arcs.
+
+---
+
+## 5. Project layout (deck page 12)
 
 ```
-project.godot              # engine config: main scene, autoloads, input map, stretch
-icon.svg                   # hand-written project icon
-export_presets.cfg         # Android preset (see §7)
-README.md
-index.html                 # reference browser build of the same game
-tools/
-  generate_audio.py        # regenerates every WAV in res/audio
-  generate_textures.py     # regenerates every PNG in res/textures
 res/
-  scenes/                  # game scenes
-    main.tscn              #   root: Stage (background/world/effects) + UI layers
-    player.tscn  enemy.tscn  boss.tscn
-    projectile.tscn  pickup.tscn  hazard.tscn
-    background.tscn  effects.tscn
-    hud.tscn  menus.tscn  dialogue.tscn  touch_controls.tscn  post_fx.tscn
-  scripts/
-    game_config.gd         # autoload GameConfig  - every tuning constant
-    save_manager.gd        # autoload SaveManager - records, settings, checkpoint
-    audio_manager.gd       # autoload AudioManager- pooled SFX + looping music
-    story_manager.gd       # autoload StoryManager- dialogue, crossroads, endings
-    main.gd                # director: state machine, waves, collisions, flow
-    manager.gd             # RunState: score, combo, XP, upgrades, story flags
-    effects.gd             # particles, shockwaves, slashes, damage numbers
-    post_fx.gd             # vignette, grain, scanlines, low-health pulse, flashes
-    entities/
-      player.gd  enemy.gd  boss.gd
-      projectile.gd  pickup.gd  hazard.gd
-    world/
-      background.gd        # three hand-drawn parallax backdrops
-      shapes.gd            # shared vector primitives
-    ui/
-      ui.gd                # interface factory (panels, cards, bars, buttons)
-      hud.gd  menus.gd  dialogue_box.gd  touch_controls.gd
-  assets/                  # shared asset notes (art is code-drawn, see below)
-  models/                  # reserved for mesh imports; the game needs none
-  textures/                # glow, glow_sharp, shadow, vignette, grain, scanline
-  audio/                   # 22 sound effects + 5 music loops (16-bit mono WAV)
+  models/            docs only — every mesh is generated in code
+  textures/          vignette, grain, scanline, glow (2D UI overlays)
+  audio/             27 generated WAVs (music + SFX)
+  scenes/            main, arena, player, enemy, boss, projectile, pickup,
+                     hazard, effects, hud, menus, dialogue, touch_controls, post_fx
+  assets/            notes on external assets
+res/scripts/
+  main.gd            campaign director: stages, story, combat resolution, endings
+  game_config.gd     3D tuning, classes, upgrades, stage tables (central CONFIG)
+  manager.gd         RunState: score, combo, XP/levels, upgrades, class state
+  save_manager.gd    settings, records, checkpoint, endings
+  audio_manager.gd   music + SFX pools
+  story_manager.gd   dialogue lines, crossroads, endings, typewriter
+  effects.gd         3D particles, rings, slashes, damage numbers
+  post_fx.gd         screen-space vignette, grain, flash
+  entities/          player.gd, enemy.gd, boss.gd, projectile.gd, pickup.gd, hazard.gd
+  world/             arena.gd, rig3d.gd, camera_rig.gd, shapes.gd
+  ui/                hud.gd, menus.gd, dialogue_box.gd, touch_controls.gd, ui.gd
+tools/
+  validate_project.py  static check: gdparse + gdlint + res:// paths + scene nodes
+  export.sh            local export helper (apk | exe | all)
+  generate_audio.py    regenerates the WAV set
+  generate_textures.py regenerates the UI overlays
 ```
 
-### Mapping to the "Key Files" legend
+### How the 3D is built without asset files
 
-| Deck legend | In this project |
-| --- | --- |
-| `project.godot` — game config | window/stretch/mobile settings, four autoloads, full input map |
-| `scenes/` — game scenes | `res/scenes/*.tscn`, main scene instanced from `project.godot` |
-| `scripts/` — GDScript | `res/scripts/**`, split into director, entities, world and UI |
-| `player.gd` / `enemy.gd` / `boss.gd` | `res/scripts/entities/` |
-| `manager.gd` | `res/scripts/manager.gd` (run state) + `res/scripts/main.gd` (director) |
-| `ui.gd` | `res/scripts/ui/ui.gd` plus `hud.gd`, `menus.gd`, `dialogue_box.gd` |
-| `assets/` — models/textures/audio | `res/textures/` and `res/audio/`; `res/models/` is reserved |
+There are no `.glb`/`.blend` files in the project — every model is constructed at
+runtime:
 
-### About the art
-
-This is a **stylised 2D game inside a 3D engine's project layout** — not a 3D game.
-Nothing here is a mesh import. Characters, the three backdrops, bullets, hazards and
-particles are drawn with `CanvasItem` vector calls every frame (`Shapes` holds the
-shared primitives), which is why there is no sprite sheet to manage. Depth is faked
-the same way the browser build did it: entities are y-sorted, scaled by their ground
-position, and cast a ground shadow.
-
-Two consequences worth knowing:
-
-* The `res/models/` folder is empty on purpose. Drop `.glb`/`.obj` files there if you
-  ever want to add real models; nothing currently loads from it.
-* Because the art is code, tweaking a colour in `player.gd` or `background.gd`
-  re-skins the game instantly.
+- `world/rig3d.gd` builds a low-poly anime figure from boxes, spheres, capsules,
+  cylinders and prisms, with an inverted-hull toon outline, and poses it for idle,
+  run, attack, cast, hurt and death.
+- `world/arena.gd` builds each stage from primitives: buildings with lit windows,
+  lamp posts with real omni lights, trees, benches, floating rift slabs, glass
+  pillars, a throne dais, plus per-stage sky, fog and lighting.
+- `world/camera_rig.gd` is the third-person camera: smooth follow, impact shake and
+  cinematic orbits for stage intros.
+- `entities/*.gd` build their own meshes (wraiths with hoods and glowing eyes,
+  Katleen with crown, cape, staff and orbiting shards, projectiles, pickups, hazards).
 
 ---
 
-## 6. Assets, regeneration and tuning
+## 6. Character art
 
-Everything ships with the repo, but both generators are pure standard-library Python
-(no Pillow, no numpy) and are safe to re-run:
+| Character | Role | In game |
+|---|---|---|
+| Ajees | protagonist | player rig, colour and weapon follow the active class |
+| Sara | love interest / ally | follows Ajees and fires support shots once the *allies* crossroad is taken |
+| Katleen | antagonist | boss rig with crown, cape, staff, shards and a phase-two recolour |
+| Bala, Manmohan, Gokul, Prince | supporting cast | named in dialogue, crossroads and endings |
 
-```bash
-python3 tools/generate_audio.py      # rewrites res/audio/*.wav  (~2.7 MB, 27 files)
-python3 tools/generate_textures.py   # rewrites res/textures/*.png (~140 KB, 6 files)
-```
-
-* **Audio** is synthesised from oscillators and noise (sine/saw/square/tri), with
-  envelopes and a simple echo; music loops are procedural pad progressions.
-  `AudioManager` loads them by name, pools ten players for SFX and loops the music
-  manually, so a missing or muted file can never crash the game.
-* **Textures** are written by a tiny zlib/struct PNG encoder: a soft glow, a sharp
-  glow, a contact shadow, a vignette, animated grain and scanlines.
-* **Balance** lives in one place: `GameConfig` (`res/scripts/game_config.gd`). Player
-  speed, damage, boss timings, stage tables, upgrade ranks, score values and palettes
-  are all constants there. Change a number, press F5.
-
-Difficulty knobs worth knowing: `STAGES[*].hp_mul / speed_mul / damage_mul`,
-`BOSS_HP`, `BOSS_MOVES[*].cooldown`, `XP_GROWTH` and `COMBO_MAX_MULT`.
+All characters are original, stylized low-poly interpretations built from primitives
+— no copyrighted character art is used.
 
 ---
 
-## 7. Building the APK and the EXE
+## 7. Building the binaries yourself
 
-The repository contains **source and assets only** — no compiled `.apk` or `.exe` is
-committed, and one cannot be produced inside the sandbox this port was written in
-(the Godot download host is blocked there, and there is no Android SDK or JDK on the
-machine). Below are the three ways to get real binaries.
-
-### Option A — build from the command line (recommended)
-
-You need:
-
-* **Godot 4.3+** on your `PATH` as `godot` (or set `GODOT=/path/to/godot`)
-* **Export templates** for that exact version:
-  `Editor → Manage Export Templates → Download and Install`
-* For Android: **Android Studio** (SDK 34 + build-tools + platform-tools), a JDK, and
-  both configured in `Editor → Editor Settings → Export → Android`
-
-Then, from the project folder:
+### Option A — script (local)
 
 ```bash
-./tools/export.sh apk     # -> build/android/SINGULARITY.apk  (debug-signed, installable)
-./tools/export.sh exe     # -> build/windows/SINGULARITY.exe  (single file, PCK embedded)
-./tools/export.sh all     # both
+# Godot 4.3+ as `godot` on PATH, or set GODOT=/path/to/godot
+./tools/export.sh exe     # build/windows/SINGULARITY.exe
+./tools/export.sh apk     # build/android/SINGULARITY.apk
+./tools/export.sh all
 ```
 
-The script runs `--import` first, then calls the headless exporter against the two
-presets in `export_presets.cfg` (`Android` and `Windows Desktop`). The Windows binary
-has the game data embedded (`binary_format/embed_pck=true`), so it is one file — copy
-it to any 64-bit Windows machine and run it.
+Android export additionally needs JDK 17, Android SDK 34 (`platform-tools`,
+`platforms;android-34`, `build-tools;34.0.0`) and a debug keystore, all configured
+in **Editor Settings → Export → Android** (or exported through CI, which does it
+automatically).
 
-Equivalent raw commands, if you prefer the editor's GUI or your own flags:
+### Option B — CI (how the published files are produced)
 
-```bash
-godot --headless --path . --export-debug   "Android"         build/android/SINGULARITY.apk
-godot --headless --path . --export-release "Windows Desktop" build/windows/SINGULARITY.exe
-```
+`.github/workflows/build.yml` runs five jobs on every push to `main`/`arena/**`:
 
-`build/` is git-ignored. For a **release** APK, switch `--export-debug` to
-`--export-release` and set `keystore/release`, `keystore/release_user` and
-`keystore/release_password` in the Android preset (or in Editor Settings) to your own
-signing key.
+1. **Headless smoke test** — imports the project, boots the 3D scene for 240 frames,
+   then plays a **complete unattended campaign** (`-- --autoplay`): all three stages,
+   crossroads, upgrades, boss phases and an ending. Any script error fails the run.
+2. **Rendered screenshots** — runs the game under Xvfb with the OpenGL renderer and
+   saves title / campus / boss stills as artifacts.
+3. **Windows .exe** — `--export-release "Windows Desktop"`.
+4. **Android .apk** — installs SDK 34, writes the Android editor settings, generates
+   the debug keystore, patches the preset and runs `--export-debug "Android"`
+   (apksigner signs and verifies the APK in the same step).
+5. **Publish** — uploads both files to the rolling `latest-build` release.
 
-### Option B — let GitHub build it (no local install)
+### Option C — the editor
 
-`.github/workflows/build.yml` defines two jobs that run inside the
-`barichello/godot-ci:4.3` container and upload the results as downloadable artifacts:
+`Project → Export…` → choose **Windows Desktop** or **Android** → *Export Project*.
+Presets, package name (`com.singularity.vessel`), version code/name, arm64-v8a,
+landscape and immersive mode are already configured in `export_presets.cfg`.
 
-1. Push this branch and open the repo's **Actions** tab.
-2. Pick **Build binaries → Run workflow** (it also runs on pushes to `main`).
-3. When the run finishes, open it and download **SINGULARITY-android** /
-   **SINGULARITY-windows** from the *Artifacts* section.
-
-The Windows job is the low-risk one. The Android job generates a debug keystore and
-points the preset at it; if your repository has Actions disabled, or the container's
-Android SDK paths differ from what Godot expects, that job may need one round of
-adjustment — the job log names the missing setting.
-
-### Option C — the export dialogs
-
-`Project → Export…` shows both presets. Select **Android** (set *Package → Unique
-Name*, version and launcher icons, keep `arm64-v8a`) or **Windows Desktop**, pick an
-output path under `build/`, and press **Export Project**. Same result as Option A.
-
-### Preset defaults
-
-| | Android | Windows Desktop |
-| --- | --- | --- |
-| preset name | `Android` | `Windows Desktop` |
-| output | `build/android/SINGULARITY.apk` | `build/windows/SINGULARITY.exe` |
-| package / arch | `com.singularity.vessel`, arm64-v8a | x86_64 |
-| orientation | landscape, immersive | windowed 1280×720 |
-| data | separate PCK inside the APK | embedded in the EXE |
-
-The project already locks landscape, uses the GL Compatibility renderer (best for
-mid-range phones) and enables immersive mode in the preset. If your Godot version
-rewrites some preset keys, re-select the values once in the export dialog and save —
-the file is plain config, not code.
+---
 
 ## 8. Verification status — read this before trusting anything
 
-The engine **could not be launched in the environment where this port was written**
-(the Godot binary download was blocked). So, honestly:
+Verified in CI on this branch (run artifacts available on the Actions tab):
 
-* Every one of the 21 GDScript files is **parsed** with `gdparse` (Godot 4 grammar)
-  and **linted** with `gdlint` — zero errors.
-* Every `res://` path referenced by scripts, scenes and `project.godot` is checked to
-  exist on disk.
-* Every node path used by `@onready` in `main.gd` is checked against `main.tscn`.
-* Every cross-object call and signal connection between the director, entities and UI
-  is checked by a static symbol pass.
-* The scenes are **not** instantiated, and no frame has been rendered, in this
-  environment. Expect to fix small things the first time you press F5.
-* **No `.apk` or `.exe` is included**, because the Godot editor and the Android SDK
-  were unavailable here. `tools/export.sh` and the GitHub Actions workflow are the
-  prepared paths to produce them; neither has been executed in this environment.
+- `gdparse` + `gdlint` clean across all 23 scripts; `tools/validate_project.py`
+  checks every `res://` path, scene node and cross-script call.
+- The project **boots headless** with zero script errors.
+- An **unattended playthrough reaches the ending** (`AUTOPLAY_RESULT reason=ending
+  stage=3 … endings=1`) — so stage flow, dialogue, crossroads, upgrades, boss phases
+  and endings all execute for real.
+- The **EXE and APK build successfully**; the APK is signed and verified by
+  `apksigner` in CI.
+- Screenshots are rendered from the actual build.
 
-The browser build in `index.html` was verified the hard way (headless runs, a
-scripted bot reaching the victory state, scripted assertions), so the rules, numbers
-and flow here follow a version of the game that is known to be playable.
+Not verified: nobody has played it with a mouse and keyboard on a real GPU here, and
+nobody has tuned the difficulty by hand. The 3D art is deliberately stylized
+low-poly — it reads as a 3D anime arena, but it is not film-quality character
+modelling (the deck itself lists 3D models as an asset still to be produced).
 
 ---
 
 ## 9. Troubleshooting
 
 | Symptom | Fix |
-| --- | --- |
-| Project opens but the screen is black | Check the Output panel; a script error stops `main.gd` before the title screen. |
-| No sound on Android | Media volume, and `SaveManager` settings (Settings → Sound Effects / Music). |
-| Touch buttons missing | Settings → *Touch controls on screen* must be on; they are hidden during menus. |
-| A shot feels like it misses the boss | Her hit centre is deliberately generous; aim at the torso, not the feet. |
-| `user://save.cfg` warning in Settings | The device denied file access; the game keeps running without records. |
+|---|---|
+| `godot: command not found` | install Godot 4.3+ and put it on PATH, or `GODOT=/path/to/godot ./tools/export.sh` |
+| Export says "export templates not found" | Editor → *Manage Export Templates* → download 4.3 stable |
+| Android export: "A valid Java SDK path is required" | set `export/android/java_sdk_path` in Editor Settings, or let CI do it |
+| Android export fails with an empty "configuration errors" list | `rendering/textures/vram_compression/import_etc2_astc` must be `true` in `project.godot` (already set — it fails silently otherwise) |
+| No sound | the WAVs are in `res/audio/`; check `AudioManager` loaded them in the Output panel |
 
 ---
 
-## 10. Reference: the single-file browser build
+## 10. The single-file browser build
 
-`index.html` is the earlier version of the same game: one self-contained file, no
-build step, no libraries. Open it in any modern browser (double-click works). It
-carries the same three stages, upgrades, crossroads and endings, saves the high score
-in `localStorage`, and synthesises its audio with the Web Audio API after the first
-tap/click. Keyboard: `WASD` move, `J` attack, `K` shot, `L` burst, `SPACE` dash,
-`H` mend, `ESC` pause. It is kept as a reference and a zero-install way to play; the
-Godot project is the version to extend.
+`index.html` is the earlier zero-install browser version of the same game (2D canvas,
+procedural art and Web Audio). It is kept as a quick way to play in a browser without
+installing anything; it is **not** the 3D Godot build.
 
 ---
 
 ## 11. Credits
 
-Design, code, story, art and audio: made for this project, in code.
-Engine: **Godot 4** (MIT). No third-party assets, fonts, plugins or libraries are
-bundled — the interface uses Godot's built-in fallback font on purpose.
+Design, code, procedural models, textures, music and sound: built for
+**abdulkather82821-shadow** from the *SINGULARITY: Vessel of the Fallen* deck.
+Story, characters and setting are fictional and written to stay respectful of the
+real PMIST community. Engine: [Godot 4.3](https://godotengine.org).
