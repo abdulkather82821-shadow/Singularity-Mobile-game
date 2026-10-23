@@ -1,15 +1,12 @@
-# Builds the Android APK and the Windows executable on GitHub's runners.
-# Start it from the Actions tab ("Run workflow") or push to main.
-# Artifacts appear under the run's "Artifacts" section.
+# Builds the Windows executable and the Android APK on GitHub's runners.
+# Start it from the Actions tab ("Run workflow") or push to main / an arena branch.
+# Results are attached to the run as downloadable artifacts.
 name: Build binaries
 
 on:
   workflow_dispatch:
   push:
     branches: [main, "arena/**"]
-
-env:
-  GODOT_VERSION: "4.3"
 
 jobs:
   windows:
@@ -63,9 +60,17 @@ jobs:
 
       - name: Probe Android toolchain
         run: |
-          echo "::warning::ANDROID_HOME=${ANDROID_HOME:-unset} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset} JAVA_HOME=${JAVA_HOME:-unset}"
-          echo "::warning::keytool=$(command -v keytool || echo missing) sdkmanager=$(command -v sdkmanager || echo missing)"
-          echo "::warning::sdk dirs: $(ls -d /root/android-sdk /opt/android-sdk /usr/lib/android-sdk /root/Android/Sdk 2>/dev/null | tr '\n' ' ')"
+          echo "::warning::ANDROID_HOME=${ANDROID_HOME:-unset} JAVA_HOME=${JAVA_HOME:-unset}"
+          if command -v java >/dev/null 2>&1; then
+            DETECTED=$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")
+            echo "JAVA_HOME=$DETECTED" >> "$GITHUB_ENV"
+            echo "::warning::java found at $DETECTED"
+          else
+            echo "::warning::no java on PATH"
+          fi
+          echo "::warning::keytool=$(command -v keytool || echo missing)"
+          echo "::warning::sdk platforms: $(ls /usr/lib/android-sdk/platforms 2>/dev/null | tr '\n' ' ')"
+          echo "::warning::sdk build-tools: $(ls /usr/lib/android-sdk/build-tools 2>/dev/null | tr '\n' ' ')"
 
       - name: Debug keystore
         run: |
@@ -73,19 +78,11 @@ jobs:
           mkdir -p "$HOME/.android"
           KEYSTORE="$HOME/.android/debug.keystore"
           if [ ! -f "$KEYSTORE" ]; then
-            if ! command -v keytool >/dev/null 2>&1; then
-              echo "::error::keytool not found in the container - no JDK for signing"
-              exit 1
-            fi
-            keytool -genkeypair -v -keystore "$KEYSTORE" \
-              -storepass android -keypass android \
-              -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
+            keytool -genkeypair -keystore "$KEYSTORE" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
-          sed -i "s|keystore/debug=\"\"|keystore/debug=\"$KEYSTORE\"|" export_presets.cfg
-          sed -i 's|keystore/debug_user=""|keystore/debug_user="androiddebugkey"|' export_presets.cfg
-          sed -i 's|keystore/debug_password=""|keystore/debug_password="android"|' export_presets.cfg
-          echo "::warning::preset: $(grep 'keystore/debug' export_presets.cfg | tr '\n' ' ')"
+          ls -l "$KEYSTORE"
+          python3 tools/ci_patch_android_preset.py "$KEYSTORE"
+          grep -E "^keystore/" export_presets.cfg
 
       - name: Export Android build
         run: |
@@ -95,7 +92,7 @@ jobs:
           CODE=$?
           echo "$OUTPUT"
           if [ $CODE -ne 0 ]; then
-            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail" | tail -n 6 | tr '\n' '|' | cut -c1-900)
+            MSG=$(echo "$OUTPUT" | grep -iE "error|cannot|missing|invalid|unable|fail|keystore|sdk" | tail -n 6 | tr '\n' '|' | cut -c1-900)
             echo "::error::APK export failed (exit $CODE): $MSG"
             exit $CODE
           fi
